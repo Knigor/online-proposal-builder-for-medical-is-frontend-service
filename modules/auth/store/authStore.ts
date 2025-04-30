@@ -1,12 +1,16 @@
 import { defineStore } from 'pinia'
 
+interface Role {
+  role: string[]
+}
+
 interface AuthState {
   user: {
     id: number
-    name: string
     email: string
-    phone: string
-    role: string
+    name: string
+    username: string
+    role: Role
   } | null
   accessToken: string | null
 }

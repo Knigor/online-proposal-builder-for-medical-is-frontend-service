@@ -8,7 +8,7 @@ export const useAuth = () => {
 
   const onLogin = async (email: string, password: string) => {
     try {
-      const { access_token, user } = await $publicApi('login_check', {
+      const { access_token, user } = await $publicApi('v1/auth', {
         method: 'POST',
         body: { email, password }
       })
@@ -43,7 +43,7 @@ export const useAuth = () => {
 
   const onRefreshToken = async () => {
     try {
-      const { access_token, user } = await $publicApi('token/refresh', {
+      const { access_token, user } = await $publicApi('v1/refresh-token', {
         method: 'GET'
       })
       authStore.setAccessToken(access_token)
