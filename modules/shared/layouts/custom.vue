@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-h-screen flex-col">
-    <header>Я шапка</header>
+    <Header />
     <main class="flex-grow">
       <slot />
     </main>
@@ -11,7 +11,9 @@
   </div>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import Header from '../components/Header.vue'
+</script>
 
 <style scoped>
 @media (max-width: 640px) {

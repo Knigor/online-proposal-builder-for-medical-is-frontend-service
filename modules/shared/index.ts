@@ -7,5 +7,13 @@ export default defineNuxtModule({
     configKey: 'shared'
   },
 
-  setup(_, nuxt) {}
+  setup(_, nuxt) {
+    nuxt.hook('pages:extend', (pages) => {
+      pages.push({
+        name: 'offers',
+        path: '/offers-select',
+        file: path.resolve(__dirname, 'pages/OffersSelect.vue')
+      })
+    })
+  }
 })

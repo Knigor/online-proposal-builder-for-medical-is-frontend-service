@@ -86,8 +86,10 @@
 <script setup lang="ts">
 import { object, string, ValidationError } from 'yup'
 import { useAuth } from '../composables/useAuth'
+import { useAuthStore } from '../store/authStore'
 
 const { onLogin } = useAuth()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const email = ref('')
@@ -140,7 +142,13 @@ const handleSubmit = async () => {
     const response = await onLogin(email.value, password.value)
     console.log('Вызывается авторизация')
     if (response.success) {
-      navigateTo('/')
+      const isAdmin = authStore.user?.role.find((item) => item === 'ROLE_ADMIN')
+      console.log(isAdmin)
+      if (isAdmin === 'ROLE_ADMIN') {
+        navigateTo('/')
+      } else {
+        navigateTo('/offers-select')
+      }
     } else {
       authError.value = 'Введен не правильный логин или пароль'
     }

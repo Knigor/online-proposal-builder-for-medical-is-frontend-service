@@ -21,16 +21,11 @@ export const useAuth = () => {
     }
   }
 
-  const onRegister = async (
-    email: string,
-    name: string,
-    password: string,
-    phone: string
-  ) => {
+  const onRegister = async (email: string, name: string, password: string) => {
     try {
       const { access_token, user } = await $publicApi('register', {
         method: 'POST',
-        body: { email: email, nameUser: name, password, phone }
+        body: { email: email, nameUser: name, password }
       })
       authStore.setAccessToken(access_token)
       authStore.setAccessUser(user)
@@ -55,7 +50,7 @@ export const useAuth = () => {
 
   const logOut = async () => {
     try {
-      await $publicApi('logout', { method: 'GET' })
+      await $publicApi('v1/logout', { method: 'GET' })
       authStore.LogOut()
 
       return { success: true }
