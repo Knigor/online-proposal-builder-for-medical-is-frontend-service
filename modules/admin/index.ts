@@ -10,9 +10,19 @@ export default defineNuxtModule({
     // Pages
     nuxt.hook('pages:extend', (pages) => {
       pages.push({
-        name: 'admin-main',
-        path: '/admin-main',
-        file: path.resolve(__dirname, 'pages/AdminMain.vue')
+        name: 'admin-product',
+        path: '/admin-product',
+        file: path.resolve(__dirname, 'pages/AdminProduct.vue')
+      })
+      pages.push({
+        name: 'admin-priceList',
+        path: '/admin-priceList',
+        file: path.resolve(__dirname, 'pages/AdminPriceList.vue')
+      })
+      pages.push({
+        name: 'admin-kp',
+        path: '/admin-kp',
+        file: path.resolve(__dirname, 'pages/AdminKP.vue')
       })
     })
 

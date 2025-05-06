@@ -12,9 +12,9 @@
         </li>
         <!-- Дропдавн -->
         <div class="">
-          <Menu as="div" class="relative inline-block text-left">
+          <Menu as="div" class="relative z-20 inline-block text-left">
             <div>
-              <MenuButton class="btn">Меню</MenuButton>
+              <MenuButton class="btn border">Меню</MenuButton>
             </div>
 
             <transition
@@ -28,19 +28,18 @@
               <MenuItems
                 class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
               >
-                <div class="px-1 py-1">
+                <div class="flex flex-col gap-1 px-1 py-1">
                   <MenuItem v-slot="{ active }">
                     <button
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
-                        'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-product'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
                       ]"
+                      @click="navigateTo('/admin-product')"
                     >
-                      <EditIcon
-                        :active="active"
-                        class="mr-2 h-5 w-5 text-blue-400"
-                        aria-hidden="true"
-                      />
                       Продукты
                     </button>
                   </MenuItem>
@@ -48,14 +47,13 @@
                     <button
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
-                        'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-priceList'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
                       ]"
+                      @click="navigateTo('/admin-priceList')"
                     >
-                      <DuplicateIcon
-                        :active="active"
-                        class="mr-2 h-5 w-5 text-blue-400"
-                        aria-hidden="true"
-                      />
                       Прайс-лист
                     </button>
                   </MenuItem>
@@ -63,14 +61,13 @@
                     <button
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
-                        'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-kp'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
                       ]"
+                      @click="navigateTo('/admin-kp')"
                     >
-                      <DuplicateIcon
-                        :active="active"
-                        class="mr-2 h-5 w-5 text-blue-400"
-                        aria-hidden="true"
-                      />
                       Создать КП
                     </button>
                   </MenuItem>
@@ -98,6 +95,7 @@ import { useAuth } from '~/modules/auth/composables/useAuth'
 
 const { logOut } = useAuth()
 const authStore = useAuthStore()
+const route = useRoute()
 
 async function handleLogOut() {
   try {
