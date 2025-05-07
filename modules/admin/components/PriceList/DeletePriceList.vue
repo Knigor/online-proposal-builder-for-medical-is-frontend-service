@@ -29,19 +29,10 @@
             <DialogPanel
               class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
-              <h1>Заполните поля для создания продукта</h1>
-              <br />
-
-              <!-- Поля для заполнения  -->
-              <ProductForm
-                :name-product="nameProduct"
-                :is-active="isActive"
-                :description-product="descriptionProduct"
-              />
-
-              <!-- Селект с выбором типа -->
-
-              <TypeProduct :current-product="currentProduct" />
+              <h1>
+                Вы уверены что хотите удалить прайс-лист продукта
+                {{ idProduct }}?
+              </h1>
 
               <div class="mt-6 flex gap-4">
                 <button class="btn btn-outline border" @click="closeModal">
@@ -49,10 +40,10 @@
                 </button>
                 <button
                   :disabled="globalStore.loading"
-                  class="btn btn-accent w-24 border"
+                  class="btn btn-error w-24 border"
                   @click="createProduct"
                 >
-                  <span v-if="!globalStore.loading">Добавить</span>
+                  <span v-if="!globalStore.loading">Удалить</span>
                   <span v-else class="loading loading-bars loading-md"></span>
                 </button>
               </div>
@@ -65,8 +56,6 @@
 </template>
 
 <script setup lang="ts">
-import ProductForm from './ProductForm.vue'
-import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
 import {
   TransitionRoot,
@@ -76,16 +65,13 @@ import {
 } from '@headlessui/vue'
 
 const isOpen = defineModel<boolean>('isOpen')
+const idProduct = defineModel<number | null>('idProduct')
 
 function closeModal() {
   isOpen.value = false
 }
 
 const globalStore = useGlobalStore()
-const nameProduct = ref('')
-const descriptionProduct = ref('')
-const isActive = ref(false)
-const currentProduct = ref('СиМед-Клиника')
 
 async function createProduct() {
   globalStore.loading = true

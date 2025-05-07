@@ -12,7 +12,7 @@
         </li>
         <!-- Дропдавн -->
         <div class="">
-          <Menu as="div" class="relative z-20 inline-block text-left">
+          <Menu as="div" class="relative inline-block text-left">
             <div>
               <MenuButton class="btn border">Меню</MenuButton>
             </div>
@@ -26,9 +26,53 @@
               leave-to-class="transform scale-95 opacity-0"
             >
               <MenuItems
-                class="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
+                class="absolute right-0 z-20 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"
               >
-                <div class="flex flex-col gap-1 px-1 py-1">
+                <div
+                  v-if="isAdmin !== 'ROLE_ADMIN'"
+                  class="flex flex-col gap-1 px-1 py-1"
+                >
+                  <MenuItem v-slot="{ active }">
+                    <button
+                      :class="[
+                        active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm'
+                      ]"
+                      @click="navigateTo('/offers-select')"
+                    >
+                      Генерация КП
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <button
+                      :class="[
+                        active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-priceList'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
+                      ]"
+                      @click="navigateTo('/admin-priceList')"
+                    >
+                      Прайс-лист
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <button
+                      :class="[
+                        active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-kp'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
+                      ]"
+                      @click="navigateTo('/admin-kp')"
+                    >
+                      Создать КП
+                    </button>
+                  </MenuItem>
+                </div>
+                <div v-else class="flex flex-col gap-1 px-1 py-1">
                   <MenuItem v-slot="{ active }">
                     <button
                       :class="[
@@ -96,6 +140,8 @@ import { useAuth } from '~/modules/auth/composables/useAuth'
 const { logOut } = useAuth()
 const authStore = useAuthStore()
 const route = useRoute()
+
+const isAdmin = authStore.user?.role.find((item) => item === 'ROLE_ADMIN')
 
 async function handleLogOut() {
   try {
