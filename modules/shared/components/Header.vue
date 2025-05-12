@@ -52,9 +52,9 @@
                           ? 'bg-blue-500 text-white'
                           : 'text-gray-900'
                       ]"
-                      @click="navigateTo('/admin-priceList')"
+                      @click="navigateTo('/manager-lk')"
                     >
-                      Прайс-лист
+                      Личный кабинет
                     </button>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">

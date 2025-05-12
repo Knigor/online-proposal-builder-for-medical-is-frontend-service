@@ -24,6 +24,11 @@ export default defineNuxtModule({
         path: '/admin-kp',
         file: path.resolve(__dirname, 'pages/AdminKP.vue')
       })
+      pages.push({
+        name: 'manager-lk',
+        path: '/manager-lk',
+        file: path.resolve(__dirname, 'pages/ManagerLK.vue')
+      })
     })
 
     // Components
