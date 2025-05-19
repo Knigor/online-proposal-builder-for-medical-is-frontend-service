@@ -37,13 +37,17 @@
         >
           Далее
         </button>
-        <button v-else class="btn btn-success border" @click="navigateTo('/')">
+        <button
+          v-else
+          class="btn btn-success border"
+          @click="navigateTo('/manager-lk')"
+        >
           Получить предложения
         </button>
         <button
           v-if="currentIndex === 0"
           class="btn btn-link btn-info"
-          @click="navigateTo('/')"
+          @click="navigateTo('/manager-lk')"
         >
           Пропустить
         </button>

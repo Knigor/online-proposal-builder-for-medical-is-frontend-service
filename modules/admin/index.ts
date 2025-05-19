@@ -27,7 +27,12 @@ export default defineNuxtModule({
       pages.push({
         name: 'manager-lk',
         path: '/manager-lk',
-        file: path.resolve(__dirname, 'pages/ManagerLK.vue')
+        file: path.resolve(__dirname, 'pages/ManagerLk.vue')
+      })
+      pages.push({
+        name: 'manager-lk-commercial-offer',
+        path: '/manager-lk/commercial-offer/:id',
+        file: path.resolve(__dirname, 'pages/ManagerCommercialOffer.vue')
       })
     })
 
