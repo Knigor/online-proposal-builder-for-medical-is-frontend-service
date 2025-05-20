@@ -16,7 +16,6 @@
 
     <!-- Карточки не пустые  -->
     <div
-      v-if="products.length !== 0"
       class="mx-auto grid max-w-[900px] grid-cols-3 items-start justify-center gap-4"
     >
       <!-- Products -->
@@ -68,7 +67,7 @@
     </div>
     <!-- Карточки с бека пустые -->
     <div
-      v-else
+      v-if="products.length === 0 && !isLoading"
       class="mx-auto flex max-w-[900px] items-center justify-center gap-4"
     >
       <p class="flex flex-col gap-4 text-2xl font-semibold">

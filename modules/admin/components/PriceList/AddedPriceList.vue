@@ -34,10 +34,17 @@
 
               <!-- Выбор продукта  -->
 
-              <ProductList />
+              <ProductList
+                v-model:current-product="currentProduct"
+                :product-list="productNameList"
+              />
 
               <!-- Поля для заполнения  -->
-              <PriceListForm />
+              <PriceListForm
+                v-model:quantity-product="quantityProduct"
+                v-model:price-product="priceProduct"
+                v-model:discount-percent="discountPercent"
+              />
 
               <div class="mt-6 flex gap-4">
                 <button class="btn btn-outline border" @click="closeModal">
@@ -64,14 +71,27 @@
 import PriceListForm from '../PriceListForm.vue'
 import ProductList from '~/modules/shared/components/ProductList.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
+import type {
+  ProductNames,
+  PriceUpdate
+} from '~/modules/shared/types/adminTypes'
 import {
   TransitionRoot,
   TransitionChild,
   Dialog,
   DialogPanel
 } from '@headlessui/vue'
+import { usePrice } from '../../composables/usePrice'
 
+const { addedPrice } = usePrice()
 const isOpen = defineModel<boolean>('isOpen')
+const productNameList = defineModel<ProductNames[]>('productNames')
+const emit = defineEmits(['updatePriceList'])
+
+const currentProduct = ref<number>()
+const quantityProduct = ref<number>()
+const priceProduct = ref<number>()
+const discountPercent = ref<number>()
 
 function closeModal() {
   isOpen.value = false
@@ -81,9 +101,24 @@ const globalStore = useGlobalStore()
 
 async function createProduct() {
   globalStore.loading = true
-  setTimeout(() => {
+
+  try {
+    const priceUpdate: PriceUpdate = {
+      product_id: currentProduct.value!,
+      price: priceProduct.value!,
+      discount_percent: discountPercent.value!,
+      quantity: quantityProduct.value!
+    }
+    const response = await addedPrice(priceUpdate)
+    console.log(response)
+
+    emit('updatePriceList')
+    closeModal()
+  } catch (error) {
+    console.log(error)
+  } finally {
     globalStore.loading = false
-  }, 500)
+  }
 }
 </script>
 

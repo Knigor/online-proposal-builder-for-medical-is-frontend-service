@@ -13,6 +13,15 @@ export const useProduct = () => {
     }
   }
 
+  const getAllProductsName = async () => {
+    try {
+      const response = await $protectedApi('products/names', { method: 'GET' })
+      return response
+    } catch (error) {
+      return error
+    }
+  }
+
   const getProductById = async (id: number) => {
     try {
       const response = await $protectedApi(`products/${id}`, { method: 'GET' })
@@ -62,6 +71,7 @@ export const useProduct = () => {
     getProductById,
     editProductById,
     deleteproductById,
-    addedProduct
+    addedProduct,
+    getAllProductsName
   }
 }
