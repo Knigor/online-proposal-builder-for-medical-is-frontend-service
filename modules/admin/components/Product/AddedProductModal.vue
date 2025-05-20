@@ -34,14 +34,14 @@
 
               <!-- Поля для заполнения  -->
               <ProductForm
-                :name-product="nameProduct"
-                :is-active="isActive"
-                :description-product="descriptionProduct"
+                v-model:name-product="nameProduct"
+                v-model:is-active="isActive"
+                v-model:description-product="descriptionProduct"
               />
 
               <!-- Селект с выбором типа -->
 
-              <TypeProduct :current-product="currentProduct" />
+              <TypeProduct v-model:current-product="currentProduct" />
 
               <div class="mt-6 flex gap-4">
                 <button class="btn btn-outline border" @click="closeModal">
@@ -68,6 +68,9 @@
 import ProductForm from '../ProductForm.vue'
 import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
+import { useAuthStore } from '~/modules/auth/store/authStore'
+import type { ProductUpdate } from '~/modules/shared/types/adminTypes'
+import { useProduct } from '../../composables/useProduct'
 import {
   TransitionRoot,
   TransitionChild,
@@ -76,11 +79,14 @@ import {
 } from '@headlessui/vue'
 
 const isOpen = defineModel<boolean>('isOpen')
+const emit = defineEmits(['updateProducts'])
 
 function closeModal() {
   isOpen.value = false
 }
 
+const { addedProduct } = useProduct()
+const authStore = useAuthStore()
 const globalStore = useGlobalStore()
 const nameProduct = ref('')
 const descriptionProduct = ref('')
@@ -89,9 +95,25 @@ const currentProduct = ref('СиМед-Клиника')
 
 async function createProduct() {
   globalStore.loading = true
-  setTimeout(() => {
+  try {
+    if (authStore.user?.id) {
+      const productUpdate: ProductUpdate = {
+        userId: authStore.user.id,
+        nameProduct: nameProduct.value,
+        discriptionProduct: descriptionProduct.value,
+        isActive: isActive.value,
+        typeProduct: currentProduct.value
+      }
+      const response = await addedProduct(productUpdate)
+      console.log(response)
+    }
+    emit('updateProducts')
+    closeModal()
+  } catch (error) {
+    console.log(error)
+  } finally {
     globalStore.loading = false
-  }, 500)
+  }
 }
 </script>
 

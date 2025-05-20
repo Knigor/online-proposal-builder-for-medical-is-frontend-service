@@ -29,35 +29,40 @@
             <DialogPanel
               class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
-              <h1>
-                Заполните поля для редактирования продукта {{ idProduct }}
-              </h1>
-              <br />
+              <template v-if="isLoadingEdit">
+                <SkeletonInput />
+              </template>
+              <template v-else>
+                <h1>
+                  Заполните поля для редактирования продукта {{ product?.id }}
+                </h1>
+                <br />
 
-              <!-- Поля для заполнения  -->
-              <ProductForm
-                :name-product="nameProduct"
-                :is-active="isActive"
-                :description-product="descriptionProduct"
-              />
+                <!-- Поля для заполнения  -->
+                <ProductForm
+                  v-model:name-product="nameProduct"
+                  v-model:is-active="isActive"
+                  v-model:description-product="descriptionProduct"
+                />
 
-              <!-- Селект с выбором типа -->
+                <!-- Селект с выбором типа -->
 
-              <TypeProduct :current-product="currentProduct" />
+                <TypeProduct v-model:current-product="currentProduct" />
 
-              <div class="mt-6 flex gap-4">
-                <button class="btn btn-outline border" @click="closeModal">
-                  Назад
-                </button>
-                <button
-                  :disabled="globalStore.loading"
-                  class="btn btn-accent w-24 border"
-                  @click="createProduct"
-                >
-                  <span v-if="!globalStore.loading">Добавить</span>
-                  <span v-else class="loading loading-bars loading-md"></span>
-                </button>
-              </div>
+                <div class="mt-6 flex gap-4">
+                  <button class="btn btn-outline border" @click="closeModal">
+                    Назад
+                  </button>
+                  <button
+                    :disabled="globalStore.loading"
+                    class="btn btn-accent w-24 border"
+                    @click="editProduct"
+                  >
+                    <span v-if="!globalStore.loading">Сохранить</span>
+                    <span v-else class="loading loading-bars loading-md"></span>
+                  </button>
+                </div>
+              </template>
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -69,32 +74,69 @@
 <script setup lang="ts">
 import ProductForm from '../ProductForm.vue'
 import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
+import SkeletonInput from '../skeletons/SkeletonInput.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
+import type { Product, ProductUpdate } from '~/modules/shared/types/adminTypes'
 import {
   TransitionRoot,
   TransitionChild,
   Dialog,
   DialogPanel
 } from '@headlessui/vue'
+import { useProduct } from '../../composables/useProduct'
+import { useAuthStore } from '~/modules/auth/store/authStore'
 
+const { editProductById } = useProduct()
+const authStore = useAuthStore()
 const isOpen = defineModel<boolean>('isOpen')
-const idProduct = defineModel<number | null>('idProduct')
+const isLoadingEdit = defineModel<boolean>('isLoading')
+const idProduct = defineModel<number>('idProduct')
+const product = defineModel<Product>('product')
 
-function closeModal() {
+async function closeModal() {
   isOpen.value = false
 }
 
+const emit = defineEmits(['updateProducts'])
+
 const globalStore = useGlobalStore()
+
 const nameProduct = ref('')
 const descriptionProduct = ref('')
-const isActive = ref(false)
-const currentProduct = ref('СиМед-Клиника')
 
-async function createProduct() {
+const isActive = ref()
+const currentProduct = ref('')
+
+watch(product, (newProduct) => {
+  if (newProduct) {
+    nameProduct.value = newProduct.nameProduct
+    descriptionProduct.value = newProduct.discriptionProduct
+    isActive.value = newProduct.isActive
+    currentProduct.value = newProduct.typeProduct
+  }
+})
+
+async function editProduct() {
   globalStore.loading = true
-  setTimeout(() => {
+  try {
+    if (authStore.user?.id && idProduct.value) {
+      const productUpdate: ProductUpdate = {
+        userId: authStore.user.id,
+        nameProduct: nameProduct.value,
+        discriptionProduct: descriptionProduct.value,
+        isActive: isActive.value,
+        typeProduct: currentProduct.value
+      }
+      const response = await editProductById(idProduct.value, productUpdate)
+      console.log(response)
+    }
+    emit('updateProducts')
+    closeModal()
+  } catch (error) {
+    console.log(error)
+  } finally {
     globalStore.loading = false
-  }, 500)
+  }
 }
 </script>
 

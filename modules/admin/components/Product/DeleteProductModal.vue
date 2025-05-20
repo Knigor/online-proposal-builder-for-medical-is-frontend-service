@@ -38,7 +38,7 @@
                 <button
                   :disabled="globalStore.loading"
                   class="btn btn-error w-24 border"
-                  @click="createProduct"
+                  @click="deleteProduct"
                 >
                   <span v-if="!globalStore.loading">Удалить</span>
                   <span v-else class="loading loading-bars loading-md"></span>
@@ -54,6 +54,7 @@
 
 <script setup lang="ts">
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
+import { useProduct } from '../../composables/useProduct'
 import {
   TransitionRoot,
   TransitionChild,
@@ -63,6 +64,8 @@ import {
 
 const isOpen = defineModel<boolean>('isOpen')
 const idProduct = defineModel<number | null>('idProduct')
+const { deleteproductById } = useProduct()
+const emit = defineEmits(['updateProducts'])
 
 function closeModal() {
   isOpen.value = false
@@ -70,11 +73,20 @@ function closeModal() {
 
 const globalStore = useGlobalStore()
 
-async function createProduct() {
+async function deleteProduct() {
   globalStore.loading = true
-  setTimeout(() => {
+  try {
+    if (idProduct.value) {
+      const response = await deleteproductById(idProduct.value)
+      console.log(response)
+    }
+    emit('updateProducts')
+    closeModal()
+  } catch (error) {
+    console.log(error)
+  } finally {
     globalStore.loading = false
-  }, 500)
+  }
 }
 </script>
 
