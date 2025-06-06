@@ -8,8 +8,10 @@
       >
         Добавить
       </button>
-      <AddedProductModal
+      <AddedLicenseCompositionModal
         v-model:is-open="isOpenAdded"
+        :base-license-data="baseLicenseData"
+        :additional-data="additionalData"
         @update-products="updateProducts"
       />
     </div>
@@ -21,19 +23,33 @@
       <!-- Products -->
       <template v-if="!isLoading">
         <div
-          v-for="item in products"
+          v-for="item in licenseData"
           :key="item.id"
           class="card bg-base-100 mb-4 min-h-64 w-64 shadow-sm"
         >
           <div class="card-body">
-            <h2 class="card-title">
-              {{ item.name_product }}
-            </h2>
-            <div class="badge badge-accent p-2">Активный</div>
-            <!-- <div v-else class="badge badge-error p-2">Не активный</div> -->
-            <p>
-              {{ truncate(item.discription_product, 60) }}
-            </p>
+            <div class="">
+              <h2 class="card-title text-blue-600">
+                {{ item.additionalModule.nameModule }}
+              </h2>
+              <span class="text-md">Связана c</span>
+              <h2 class="card-title text-green-600">
+                {{ item.baseLicense.nameLicense }}
+              </h2>
+            </div>
+
+            <h1>Входят ли связанные модули?</h1>
+            <div class="mt-4 flex flex-col gap-2">
+              <div class="flex justify-between">
+                <span class="font-semibold">Входит:</span>
+                <span>{{ item.required ? 'Да' : 'Нет' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-semibold">Сочетается:</span>
+                <span>{{ item.compatible ? 'Да' : 'Нет' }}</span>
+              </div>
+            </div>
+
             <div class="flex flex-wrap justify-end gap-2">
               <button
                 class="btn btn-sm btn-error"
@@ -77,14 +93,16 @@
       </p>
     </div>
 
-    <EditProductModal
+    <EditLicenseCompositionModal
       v-model:is-open="isOpenEdit"
-      v-model:product="product"
+      v-model:license="license"
       v-model:is-loading="isLoadingEdit"
+      :base-license-data="baseLicenseData"
+      :additional-data="additionalData"
       :id-product="editProductId!"
       @update-products="updateProducts"
     />
-    <DeleteProductModal
+    <DeleteLicenseCompositionModal
       v-model:is-open="isOpenDelete"
       :id-product="deleteProductId"
       @update-products="updateProducts"
@@ -93,19 +111,36 @@
 </template>
 
 <script setup lang="ts">
-import AddedProductModal from '../components/Product/AddedProductModal.vue'
-import EditProductModal from '../components/Product/EditProductModal.vue'
-import DeleteProductModal from '../components/Product/DeleteProductModal.vue'
+import AddedLicenseCompositionModal from '../components/LicenseComposition/AddedLicenseCompositionModal.vue'
+import EditLicenseCompositionModal from '../components/LicenseComposition/EditLicenseCompositionModal.vue'
+import DeleteLicenseCompositionModal from '../components/LicenseComposition/DeleteLicenseCompositionModal.vue'
 import { useProduct } from '~/modules/admin/composables/useProduct'
-import type { Product } from '~/modules/shared/types/adminTypes'
+import type {
+  Product,
+  LicenseComposition,
+  AdditionalModule,
+  BaseLicenses
+} from '~/modules/shared/types/adminTypes'
 import SekeletonCards from '../components/skeletons/SekeletonCards.vue'
+import { useLicenseComposition } from '../composables/useLicenseComposition'
+import { useAdditionalModule } from '../composables/useAdditionalModule'
+import { useBaseLicenses } from '../composables/useBaseLicenses'
 
 definePageMeta({
   layout: 'custom'
 })
 
-const { getAllProducts, getProductById } = useProduct()
+const { getAllProducts } = useProduct()
+const { getAllBaseLicenses } = useBaseLicenses()
+const { getAllAdditionalModules } = useAdditionalModule()
+const { getAllLicenseComposition, getLicenseCompositionById } =
+  useLicenseComposition()
 
+const licenseData = ref<LicenseComposition[]>([])
+const license = ref<LicenseComposition>()
+
+const additionalData = ref<AdditionalModule[]>([])
+const baseLicenseData = ref<BaseLicenses[]>([])
 const products = ref<Product[]>([])
 const product = ref<Product>()
 
@@ -113,8 +148,14 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const response = await getAllProducts()
+    const responseLicense = await getAllLicenseComposition()
+    const responseBaseLicense = await getAllBaseLicenses()
+    const responseAdditional = await getAllAdditionalModules()
 
     console.log(response)
+    additionalData.value = responseAdditional
+    baseLicenseData.value = responseBaseLicense
+    licenseData.value = responseLicense
     products.value = response
   } catch (error) {
     console.log(error)
@@ -139,8 +180,14 @@ async function updateProducts() {
   isLoading.value = true
   try {
     const response = await getAllProducts()
+    const responseLicense = await getAllLicenseComposition()
+    const responseBaseLicense = await getAllBaseLicenses()
+    const responseAdditional = await getAllAdditionalModules()
 
     console.log(response)
+    additionalData.value = responseAdditional
+    baseLicenseData.value = responseBaseLicense
+    licenseData.value = responseLicense
     products.value = response
   } catch (error) {
     console.log(error)
@@ -161,8 +208,8 @@ async function handleOpenEdit(id: number) {
   editProductId.value = id
   isLoadingEdit.value = true
   try {
-    const response = await getProductById(id)
-    product.value = response
+    const response = await getLicenseCompositionById(id)
+    license.value = response
     console.log(response)
   } catch (error) {
     console.log(error)

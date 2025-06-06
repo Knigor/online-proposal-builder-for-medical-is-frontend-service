@@ -64,3 +64,45 @@ export interface BaseLicenseCreate {
   type_license: string
   product_id: number
 }
+
+export interface LicenseCompositionBaseLicense {
+  id: number
+  nameLicense: string
+  descriptionLicense: string
+  offerPriceLicense: number
+  purchasePriceLicense: number
+  maxDiscount: number
+  typeLicense: string
+  product: {
+    id: number
+    nameProduct: string
+  }
+}
+
+export interface LicenseCompositionAdditionalModule {
+  id: number
+  nameModule: string
+  descriptionModule: string
+  offerPrice: number
+  purchasePrice: number
+  maxDiscountPercent: number
+  product: {
+    id: number
+    nameProduct: string
+  }
+}
+
+export interface LicenseComposition {
+  id: number
+  required: boolean
+  compatible: boolean
+  baseLicense: LicenseCompositionBaseLicense
+  additionalModule: LicenseCompositionAdditionalModule
+}
+
+export interface createLicenseComposition {
+  required: boolean
+  compatible: boolean
+  base_license_id: number
+  additional_module_id: number
+}
