@@ -56,7 +56,7 @@ export const useProduct = () => {
 
   const addedProduct = async (data: ProductUpdate) => {
     try {
-      const response = await $protectedApi('products/', {
+      const response = await $protectedApi('products', {
         method: 'POST',
         body: data
       })

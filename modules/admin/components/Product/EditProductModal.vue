@@ -46,8 +46,8 @@
                 />
 
                 <!-- Селект с выбором типа -->
-
-                <TypeProduct v-model:current-product="currentProduct" />
+                <!-- 
+                <TypeProduct v-model:current-product="currentProduct" /> -->
 
                 <div class="mt-6 flex gap-4">
                   <button class="btn btn-outline border" @click="closeModal">
@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import ProductForm from '../ProductForm.vue'
-import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
+// import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
 import SkeletonInput from '../skeletons/SkeletonInput.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
 import type { Product, ProductUpdate } from '~/modules/shared/types/adminTypes'
@@ -101,18 +101,16 @@ const emit = defineEmits(['updateProducts'])
 
 const globalStore = useGlobalStore()
 
-const nameProduct = ref('')
+const nameProduct = ref('rrr')
 const descriptionProduct = ref('')
 
 const isActive = ref()
-const currentProduct = ref('')
+// const currentProduct = ref('')
 
 watch(product, (newProduct) => {
   if (newProduct) {
-    nameProduct.value = newProduct.nameProduct
-    descriptionProduct.value = newProduct.discriptionProduct
-    isActive.value = newProduct.isActive
-    currentProduct.value = newProduct.typeProduct
+    nameProduct.value = newProduct.name_product
+    descriptionProduct.value = newProduct.discription_product
   }
 })
 
@@ -121,11 +119,9 @@ async function editProduct() {
   try {
     if (authStore.user?.id && idProduct.value) {
       const productUpdate: ProductUpdate = {
-        userId: authStore.user.id,
-        nameProduct: nameProduct.value,
-        discriptionProduct: descriptionProduct.value,
-        isActive: isActive.value,
-        typeProduct: currentProduct.value
+        // userId: authStore.user.id,
+        name_product: nameProduct.value,
+        discription_product: descriptionProduct.value
       }
       const response = await editProductById(idProduct.value, productUpdate)
       console.log(response)

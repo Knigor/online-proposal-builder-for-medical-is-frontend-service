@@ -15,6 +15,26 @@ export default defineNuxtModule({
         file: path.resolve(__dirname, 'pages/AdminProduct.vue')
       })
       pages.push({
+        name: 'admin-additional-module',
+        path: '/admin-additional-module',
+        file: path.resolve(__dirname, 'pages/AdminAdditionalModule.vue')
+      })
+      pages.push({
+        name: 'admin-base-licenses',
+        path: '/admin-base-licenses',
+        file: path.resolve(__dirname, 'pages/AdminBaseLicenses.vue')
+      })
+      pages.push({
+        name: 'admin-license-composition',
+        path: '/admin-license-composition',
+        file: path.resolve(__dirname, 'pages/AdminLicenseComposition.vue')
+      })
+      pages.push({
+        name: 'admin-discount-level',
+        path: '/admin-discount-level',
+        file: path.resolve(__dirname, 'pages/AdminDiscountLevel.vue')
+      })
+      pages.push({
         name: 'admin-priceList',
         path: '/admin-priceList',
         file: path.resolve(__dirname, 'pages/AdminPriceList.vue')

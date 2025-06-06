@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="p-4 text-left text-2xl">Список продуктов</h1>
+    <h1 class="p-4 text-left text-2xl">Список всех базовых лицензий</h1>
     <div class="mx-auto mt-4 flex max-w-[900px] justify-end">
       <button
         class="btn btn-accent btn-link hover:text-green-700"
@@ -8,8 +8,9 @@
       >
         Добавить
       </button>
-      <AddedProductModal
+      <AddedBaseLicensesModal
         v-model:is-open="isOpenAdded"
+        :products="products"
         @update-products="updateProducts"
       />
     </div>
@@ -21,20 +22,39 @@
       <!-- Products -->
       <template v-if="!isLoading">
         <div
-          v-for="item in products"
+          v-for="item in baseLicensess"
           :key="item.id"
           class="card bg-base-100 mb-4 min-h-64 w-64 shadow-sm"
         >
           <div class="card-body">
+            <h1 class="card-title text-blue-700">
+              {{ item.product.nameProduct }}
+            </h1>
             <h2 class="card-title">
-              {{ item.name_product }}
+              {{ item.nameLicense }}
             </h2>
-            <div class="badge badge-accent p-2">Активный</div>
-            <!-- <div v-else class="badge badge-error p-2">Не активный</div> -->
-            <p>
-              {{ truncate(item.discription_product, 60) }}
+            <p class="truncate text-gray-600">
+              {{ truncate(item.descriptionLicense, 60) }}
             </p>
-            <div class="flex flex-wrap justify-end gap-2">
+            <div class="mt-4 flex flex-col gap-2">
+              <div class="flex justify-between">
+                <span class="font-semibold">Цена покупки:</span>
+                <span>{{ item.purchasePriceLicense }} ₽</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-semibold">Цена предложения:</span>
+                <span>{{ item.offerPriceLicense }} ₽</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-semibold">Макс. скидка:</span>
+                <span>{{ item.maxDiscount }}%</span>
+              </div>
+              <div class="flex justify-between gap-4">
+                <span class="font-semibold">Тип лицензии</span>
+                <span>{{ item.typeLicense }}</span>
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap justify-end gap-2">
               <button
                 class="btn btn-sm btn-error"
                 @click="handleOpenDelete(item.id)"
@@ -65,7 +85,7 @@
     </div>
     <!-- Карточки с бека пустые -->
     <div
-      v-if="products.length === 0 && !isLoading"
+      v-if="baseLicensess.length === 0 && !isLoading"
       class="mx-auto flex max-w-[900px] items-center justify-center gap-4"
     >
       <p class="flex flex-col gap-4 text-2xl font-semibold">
@@ -77,14 +97,15 @@
       </p>
     </div>
 
-    <EditProductModal
+    <EditBaseLicensesModal
       v-model:is-open="isOpenEdit"
-      v-model:product="product"
+      v-model:licenses="licenses"
       v-model:is-loading="isLoadingEdit"
+      v-model:products="products"
       :id-product="editProductId!"
-      @update-products="updateProducts"
+      @update-licenses="updateProducts"
     />
-    <DeleteProductModal
+    <DeleteBaseLicensesModal
       v-model:is-open="isOpenDelete"
       :id-product="deleteProductId"
       @update-products="updateProducts"
@@ -93,29 +114,34 @@
 </template>
 
 <script setup lang="ts">
-import AddedProductModal from '../components/Product/AddedProductModal.vue'
-import EditProductModal from '../components/Product/EditProductModal.vue'
-import DeleteProductModal from '../components/Product/DeleteProductModal.vue'
+import AddedBaseLicensesModal from '../components/BaseLicenses/AddedBaseLicensesModal.vue'
+import EditBaseLicensesModal from '../components/BaseLicenses/EditBaseLicensesModal.vue'
+import DeleteBaseLicensesModal from '../components/BaseLicenses/DeleteBaseLicensesModal.vue'
 import { useProduct } from '~/modules/admin/composables/useProduct'
-import type { Product } from '~/modules/shared/types/adminTypes'
+import type { BaseLicenses, Product } from '~/modules/shared/types/adminTypes'
 import SekeletonCards from '../components/skeletons/SekeletonCards.vue'
+import { useBaseLicenses } from '../composables/useBaseLicenses'
 
 definePageMeta({
   layout: 'custom'
 })
 
 const { getAllProducts, getProductById } = useProduct()
+const { getAllBaseLicenses, getBaseLicensesById } = useBaseLicenses()
 
+const baseLicensess = ref<BaseLicenses[]>([])
 const products = ref<Product[]>([])
-const product = ref<Product>()
+const licenses = ref<BaseLicenses>()
 
 onMounted(async () => {
   isLoading.value = true
   try {
-    const response = await getAllProducts()
+    const response = await getAllBaseLicenses()
+    const responseProducts = await getAllProducts()
 
     console.log(response)
-    products.value = response
+    baseLicensess.value = response
+    products.value = responseProducts
   } catch (error) {
     console.log(error)
   } finally {
@@ -138,10 +164,10 @@ function openModal() {
 async function updateProducts() {
   isLoading.value = true
   try {
-    const response = await getAllProducts()
+    const response = await getAllBaseLicenses()
 
     console.log(response)
-    products.value = response
+    baseLicensess.value = response
   } catch (error) {
     console.log(error)
   } finally {
@@ -161,8 +187,8 @@ async function handleOpenEdit(id: number) {
   editProductId.value = id
   isLoadingEdit.value = true
   try {
-    const response = await getProductById(id)
-    product.value = response
+    const response = await getBaseLicensesById(id)
+    licenses.value = response
     console.log(response)
   } catch (error) {
     console.log(error)

@@ -23,7 +23,7 @@
       </textarea>
     </div>
     <!-- Активность -->
-    <div class="flex gap-2">
+    <!-- <div class="flex gap-2">
       <input
         id="isActive"
         v-model="isActive"
@@ -31,14 +31,13 @@
         class="checkbox checkbox-info border"
       />
       <label for="isActive">Сделать активным?</label>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
 const nameProduct = defineModel<string>('nameProduct')
 const descriptionProduct = defineModel<string>('descriptionProduct')
-const isActive = defineModel<boolean>('isActive')
 </script>
 
 <style scoped></style>

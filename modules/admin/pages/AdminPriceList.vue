@@ -71,6 +71,7 @@
     <DeletePriceList
       v-model:is-open="isOpenDelete"
       :id-product="deleteProductId"
+      @update-price-list="updatePriceList"
     />
   </div>
 </template>
@@ -79,7 +80,11 @@
 import AddedPriceList from '../components/PriceList/AddedPriceList.vue'
 import EditPriceList from '../components/PriceList/EditPriceList.vue'
 import DeletePriceList from '../components/PriceList/DeletePriceList.vue'
-import type { PriceList, ProductNames } from '~/modules/shared/types/adminTypes'
+import type {
+  PriceList,
+  ProductNames,
+  PriceListEdit
+} from '~/modules/shared/types/adminTypes'
 import { usePrice } from '../composables/usePrice'
 import { useProduct } from '../composables/useProduct'
 import SekeletonCards from '../components/skeletons/SekeletonCards.vue'
@@ -92,6 +97,7 @@ const { getAllPrice } = usePrice()
 const { getAllProductsName } = useProduct()
 const priceList = ref<PriceList[]>([])
 const productNameList = ref<ProductNames[]>([])
+const priceListEdit = ref<PriceListEdit[]>([])
 
 onMounted(async () => {
   isLoading.value = true

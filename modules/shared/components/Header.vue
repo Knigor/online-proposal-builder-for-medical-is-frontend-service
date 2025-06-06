@@ -92,13 +92,13 @@
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
                         'group flex w-full items-center rounded-md px-2 py-2 text-sm',
-                        route.path === '/admin-priceList'
+                        route.path === '/admin-additional-module'
                           ? 'bg-blue-500 text-white'
                           : 'text-gray-900'
                       ]"
-                      @click="navigateTo('/admin-priceList')"
+                      @click="navigateTo('/admin-additional-module')"
                     >
-                      Прайс-лист
+                      Дополнительные модули
                     </button>
                   </MenuItem>
                   <MenuItem v-slot="{ active }">
@@ -106,13 +106,41 @@
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
                         'group flex w-full items-center rounded-md px-2 py-2 text-sm',
-                        route.path === '/admin-kp'
+                        route.path === '/admin-base-licenses'
                           ? 'bg-blue-500 text-white'
                           : 'text-gray-900'
                       ]"
-                      @click="navigateTo('/admin-kp')"
+                      @click="navigateTo('/admin-base-licenses')"
                     >
-                      Создать КП
+                      Базовые лицензии
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <button
+                      :class="[
+                        active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-license-composition'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
+                      ]"
+                      @click="navigateTo('/admin-license-composition')"
+                    >
+                      Лицензии и модули
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <button
+                      :class="[
+                        active ? 'bg-blue-500 text-white' : 'text-gray-900',
+                        'group flex w-full items-center rounded-md px-2 py-2 text-sm',
+                        route.path === '/admin-discount-level'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-900'
+                      ]"
+                      @click="navigateTo('/admin-discount-level')"
+                    >
+                      Уровни скидок
                     </button>
                   </MenuItem>
                 </div>

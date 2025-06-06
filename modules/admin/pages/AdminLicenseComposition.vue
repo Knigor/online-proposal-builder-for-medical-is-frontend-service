@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="p-4 text-left text-2xl">Список продуктов</h1>
+    <h1 class="p-4 text-left text-2xl">Список связных модулей и лицензий</h1>
     <div class="mx-auto mt-4 flex max-w-[900px] justify-end">
       <button
         class="btn btn-accent btn-link hover:text-green-700"

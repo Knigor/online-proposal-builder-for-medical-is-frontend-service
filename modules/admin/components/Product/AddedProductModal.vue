@@ -41,7 +41,7 @@
 
               <!-- Селект с выбором типа -->
 
-              <TypeProduct v-model:current-product="currentProduct" />
+              <!-- <TypeProduct v-model:current-product="currentProduct" /> -->
 
               <div class="mt-6 flex gap-4">
                 <button class="btn btn-outline border" @click="closeModal">
@@ -66,10 +66,10 @@
 
 <script setup lang="ts">
 import ProductForm from '../ProductForm.vue'
-import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
+// import TypeProduct from '~/modules/shared/components/TypeProduct.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
 import { useAuthStore } from '~/modules/auth/store/authStore'
-import type { ProductUpdate } from '~/modules/shared/types/adminTypes'
+import type { ProductCreate } from '~/modules/shared/types/adminTypes'
 import { useProduct } from '../../composables/useProduct'
 import {
   TransitionRoot,
@@ -91,18 +91,16 @@ const globalStore = useGlobalStore()
 const nameProduct = ref('')
 const descriptionProduct = ref('')
 const isActive = ref(false)
-const currentProduct = ref('СиМед-Клиника')
+// const currentProduct = ref('СиМед-Клиника')
 
 async function createProduct() {
   globalStore.loading = true
   try {
     if (authStore.user?.id) {
-      const productUpdate: ProductUpdate = {
-        userId: authStore.user.id,
-        nameProduct: nameProduct.value,
-        discriptionProduct: descriptionProduct.value,
-        isActive: isActive.value,
-        typeProduct: currentProduct.value
+      const productUpdate: ProductCreate = {
+        user_id: authStore.user.id,
+        name_product: nameProduct.value,
+        discription_product: descriptionProduct.value
       }
       const response = await addedProduct(productUpdate)
       console.log(response)

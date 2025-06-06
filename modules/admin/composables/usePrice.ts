@@ -25,5 +25,16 @@ export const usePrice = () => {
     }
   }
 
-  return { getAllPrice, addedPrice }
+  const deletePriceById = async (id: number) => {
+    try {
+      const response = await $protectedApi(`price-list/delete/${id}`, {
+        method: 'DELETE'
+      })
+      return response
+    } catch (error) {
+      return error
+    }
+  }
+
+  return { getAllPrice, addedPrice, deletePriceById }
 }

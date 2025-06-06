@@ -64,11 +64,11 @@
           ></progress>
         </div>
 
-        <div>
+        <!-- <div>
           <NuxtLink to="/register">
             <button class="btn btn-block">Зарегистрироваться</button>
           </NuxtLink>
-        </div>
+        </div> -->
       </form>
     </div>
 
