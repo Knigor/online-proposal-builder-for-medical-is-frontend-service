@@ -106,3 +106,59 @@ export interface createLicenseComposition {
   base_license_id: number
   additional_module_id: number
 }
+
+export interface DiscountProduct {
+  id: number
+  name: number
+}
+
+export interface PricingTier {
+  id: number
+  type: string
+  min_licenses: number
+  max_licenses: number
+  min_amount: number
+  max_amount: number
+  discount_percent: number
+  product: DiscountProduct
+}
+
+export interface createPricingTier {
+  type: string
+  min_licenses: number
+  max_licenses: number
+  min_amount: number
+  max_amount: number
+  product_id: number
+}
+
+export interface createDiscount {
+  id: number
+  discountPercent: number
+}
+
+export const typeDiscount = [
+  { id: 1, type: 'По количеству' },
+  { id: 2, type: 'По сумме' }
+] as const
+
+export interface CommercialOffer {
+  id: number
+  status: boolean
+  created_at: string
+  total_price: number
+  accepted_at: string
+  items_count: number
+}
+
+export interface CreateCommercialOffer {
+  id: number
+  creed_at: string
+}
+
+export interface AddProductToCommercialOffer {
+  product_id: number
+  base_license_id: number
+  additional_module_id: number
+  quantity: number
+}

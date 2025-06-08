@@ -147,7 +147,7 @@ const handleSubmit = async () => {
       if (isAdmin === 'ROLE_ADMIN') {
         navigateTo('/')
       } else {
-        navigateTo('/offers-select')
+        navigateTo('/manager-lk')
       }
     } else {
       authError.value = 'Введен не правильный логин или пароль'

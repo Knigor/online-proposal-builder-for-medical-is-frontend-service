@@ -3,7 +3,12 @@
     <h1 class="mb-8 text-3xl font-semibold text-gray-800">
       Личный кабинет менеджера
     </h1>
-
+    <button
+      class="btn btn-accent btn-link hover:text-green-700"
+      @click="createOfferSelect"
+    >
+      Создать новое КП
+    </button>
     <div
       v-if="route.name === 'manager-lk'"
       class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
@@ -12,77 +17,86 @@
         v-for="proposal in proposals"
         :key="proposal.id"
         class="cursor-pointer rounded-lg bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-        @click="navigateToProposal(proposal.commercial_offer_id)"
+        @click="navigateToProposal(proposal.id)"
       >
         <div class="mb-4 flex items-center justify-between">
-          <span class="font-semibold text-gray-700"
-            >КП #{{ proposal.commercial_offer_id }}</span
-          >
+          <span class="font-semibold text-gray-700">КП #{{ proposal.id }}</span>
           <span
             :class="[
               'rounded-full px-3 py-1 text-sm font-medium',
               getStatusClass(proposal.status)
             ]"
           >
-            {{ proposal.status }}
+            {{ proposal.status ? 'Принято' : 'Не принято' }}
           </span>
         </div>
-        <div class="flex items-center gap-2 text-gray-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-          <span>{{ proposal.email_client }}</span>
+
+        <div class="space-y-1 text-sm text-gray-600">
+          <div class="flex justify-between">
+            <span>Создано:</span>
+            <span>{{ formatDate(proposal.created_at) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Количество товаров:</span>
+            <span>{{ proposal.items_count }}</span>
+          </div>
+          <div class="flex justify-between font-semibold">
+            <span>Сумма:</span>
+            <span>{{ formatPrice(proposal.total_price) }} ₽</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <router-view v-else></router-view>
+    <router-view v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useCommercialOffer } from '../composables/useCommercialOffer'
+import type { CommercialOffer } from '~/modules/shared/types/adminTypes'
 
 definePageMeta({
   layout: 'custom'
 })
 
+onMounted(async () => {
+  try {
+    const response = await getAllCommercialOffers()
+    proposals.value = response
+  } catch (error) {
+    console.log(error)
+  }
+})
+
 const router = useRouter()
 const route = useRoute()
 
-// Mock data - replace with actual API call
-const proposals = ref([
-  {
-    id: 6,
-    user_id: 10,
-    commercial_offer_id: 5,
-    status: 'Отправлено',
-    email_client: 'test@mail.ru'
-  }
-])
+const { getAllCommercialOffers } = useCommercialOffer()
+
+const proposals = ref<CommercialOffer[]>([])
 
 const navigateToProposal = (id: number) => {
   router.push(`/manager-lk/commercial-offer/${id}`)
 }
 
-const getStatusClass = (status: string) => {
+const createOfferSelect = () => {
+  router.push('/offers-select')
+}
+
+const getStatusClass = (status: boolean) => {
   const statusMap: Record<string, string> = {
-    Отправлено: 'bg-blue-50 text-blue-700',
-    'В работе': 'bg-orange-50 text-orange-700',
-    Завершено: 'bg-green-50 text-green-700'
+    true: 'bg-blue-50 text-blue-700',
+    false: 'bg-gray-50 text-gray-700'
   }
-  return statusMap[status] || 'bg-gray-50 text-gray-700'
+  return statusMap[status.toString()] || 'bg-gray-50 text-gray-700'
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleString('ru-RU')
+}
+
+const formatPrice = (price: number) => {
+  return price.toLocaleString('ru-RU')
 }
 </script>
