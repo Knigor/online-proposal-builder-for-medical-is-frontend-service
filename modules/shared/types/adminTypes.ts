@@ -160,5 +160,41 @@ export interface AddProductToCommercialOffer {
   product_id: number
   base_license_id: number
   additional_module_id: number
+}
+
+export interface CommercialOffersItems {
+  product_id: number
+  base_license_id: number
+  additional_module_id: number
+}
+
+export interface CommercialOffersItemsById {
+  id: number
+  product: {
+    id: number
+    name: string
+  }
+  base_license?: {
+    id: number
+    name: string
+    price: number
+  }
+  additional_module?: {
+    id: number
+    name: string
+    price: number
+  }
   quantity: number
+  price: number
+  discount: number | null
+  total: number
+}
+
+export interface CommercialOffersById {
+  id: number
+  status: boolean
+  created_at: string
+  total_price: number
+  accepted_at: string | null
+  items: CommercialOffersItemsById[]
 }

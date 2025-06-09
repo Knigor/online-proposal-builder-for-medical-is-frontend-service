@@ -1,8 +1,5 @@
 import type { $Fetch } from 'ofetch'
-import type {
-  CreateCommercialOffer,
-  AddProductToCommercialOffer
-} from '~/modules/shared/types/adminTypes'
+import type { AddProductToCommercialOffer } from '~/modules/shared/types/adminTypes'
 
 export const useCommercialOffer = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
@@ -29,11 +26,10 @@ export const useCommercialOffer = () => {
     }
   }
 
-  const createCommercialOffer = async (data: CreateCommercialOffer) => {
+  const createCommercialOffer = async () => {
     try {
       const response = await $protectedApi('commercial-offers', {
-        method: 'POST',
-        body: data
+        method: 'POST'
       })
       return response
     } catch (error) {
@@ -56,10 +52,22 @@ export const useCommercialOffer = () => {
     }
   }
 
+  const deleteCommercialOffers = async (id: number) => {
+    try {
+      const response = await $protectedApi(`commercial-offers/${id}`, {
+        method: 'DELETE'
+      })
+      return response
+    } catch (error) {
+      return error
+    }
+  }
+
   return {
     getAllCommercialOffers,
     getCommercialOffersById,
     createCommercialOffer,
-    addedProductKP
+    addedProductKP,
+    deleteCommercialOffers
   }
 }

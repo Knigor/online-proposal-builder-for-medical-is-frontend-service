@@ -16,10 +16,12 @@
       <div
         v-for="proposal in proposals"
         :key="proposal.id"
-        class="cursor-pointer rounded-lg bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
-        @click="navigateToProposal(proposal.id)"
+        class="rounded-lg bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md"
       >
-        <div class="mb-4 flex items-center justify-between">
+        <div
+          class="relative my-4 flex cursor-pointer items-center justify-between rounded-2xl border border-transparent p-2 hover:border-purple-600"
+          @click="navigateToProposal(proposal.id)"
+        >
           <span class="font-semibold text-gray-700">КП #{{ proposal.id }}</span>
           <span
             :class="[
@@ -44,6 +46,21 @@
             <span>Сумма:</span>
             <span>{{ formatPrice(proposal.total_price) }} ₽</span>
           </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap justify-end gap-2">
+          <button
+            class="btn btn-sm btn-error"
+            @click="handleDeleteKP(proposal.id)"
+          >
+            Удалить
+          </button>
+          <button
+            class="btn btn-sm btn-warning"
+            @click="addedNewProduct(proposal.id)"
+          >
+            Редактировать
+          </button>
         </div>
       </div>
     </div>
@@ -72,9 +89,19 @@ onMounted(async () => {
 const router = useRouter()
 const route = useRoute()
 
-const { getAllCommercialOffers } = useCommercialOffer()
+const { getAllCommercialOffers, deleteCommercialOffers } = useCommercialOffer()
 
 const proposals = ref<CommercialOffer[]>([])
+
+const handleDeleteKP = async (id: number) => {
+  try {
+    await deleteCommercialOffers(id)
+    const response = await getAllCommercialOffers()
+    proposals.value = response
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 const navigateToProposal = (id: number) => {
   router.push(`/manager-lk/commercial-offer/${id}`)
@@ -98,5 +125,14 @@ const formatDate = (date: string) => {
 
 const formatPrice = (price: number) => {
   return price.toLocaleString('ru-RU')
+}
+
+const addedNewProduct = (id: number) => {
+  router.push({
+    path: '/offers-select',
+    query: {
+      id
+    }
+  })
 }
 </script>
