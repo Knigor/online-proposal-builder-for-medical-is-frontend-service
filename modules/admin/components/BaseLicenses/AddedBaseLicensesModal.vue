@@ -64,7 +64,7 @@
               <div class="mt-4 space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">
-                    Цена предложения
+                    Цена продления
                   </label>
                   <input
                     v-model.number="offerPriceLicense"
@@ -213,7 +213,7 @@ function resetForm() {
   offerPriceLicense.value = 0
   purchasePriceLicense.value = 0
   maxDiscount.value = 0
-  typeLicense.value = 'perpetual'
+  typeLicense.value = 'Редакция'
   productId.value = 0
 }
 

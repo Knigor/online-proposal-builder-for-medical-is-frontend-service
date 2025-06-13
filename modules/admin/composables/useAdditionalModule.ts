@@ -7,14 +7,23 @@ import type {
 export const useAdditionalModule = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
 
-  const getAllAdditionalModules = async () => {
+  const getAllAdditionalModules = async (
+    params: {
+      name_module?: string
+      product_id?: number
+      sort?: 'name_module' | 'offer_price' | 'purchase_price'
+      direction?: 'asc' | 'desc'
+    } = {}
+  ) => {
     try {
-      const response = await $protectedApi('additional-modules', {
-        method: 'GET'
+      const response = await $protectedApi('additional-modules/', {
+        method: 'GET',
+        params
       })
       return response
     } catch (error) {
-      return error
+      console.error('Ошибка при получении модулей:', error)
+      throw error
     }
   }
 

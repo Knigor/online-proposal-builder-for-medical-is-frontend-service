@@ -16,7 +16,7 @@
       v-if="commercialOffer"
       ref="pdfContent"
       :class="[
-        'relative mx-auto mt-4 max-w-[900px] rounded-lg bg-white p-6 shadow-sm',
+        'relative mx-auto mt-4 max-w-[1400px] rounded-lg bg-white p-6 shadow-sm',
         isExportingPDF ? 'pdf-export' : ''
       ]"
     >
@@ -26,58 +26,136 @@
           № {{ commercialOffer.id }} от
           {{ formatDate(commercialOffer.created_at, true) }}
         </p>
-        <p></p>
       </div>
       <div class="relative bottom-16">
         <img class="h-32 w-32" src="/public/si-med.jpg" />
       </div>
 
-      <div class="mb-4 text-sm">
-        <p><strong>Заказчик:</strong> {{ commercialOffer.company || '—' }}</p>
+      <div class="mb-4 flex flex-col gap-4 text-sm">
+        <div class="flex items-center gap-4">
+          <label class="block text-sm font-medium text-gray-700"
+            ><strong>Заказчик:</strong></label
+          >
+          <select
+            v-model="currentCustomer"
+            class="select select-xs mt-1 border"
+          >
+            >
+            <option disabled :value="null">-- Выберите заказчика --</option>
+            <option v-for="item in customers" :key="item.id" :value="item">
+              {{ item.nameCustomer }}
+            </option>
+          </select>
+        </div>
         <p>
           <strong>Контактное лицо:</strong>
-          {{ commercialOffer.contact_person || '—' }}
+          {{ currentCustomer?.contactPerson || '—' }}
         </p>
-        <p><strong>Телефон:</strong> {{ commercialOffer.phone || '—' }}</p>
-        <p><strong>Email:</strong> {{ commercialOffer.email || '—' }}</p>
+        <p><strong>Телефон:</strong> {{ currentCustomer?.phone || '—' }}</p>
+        <p><strong>Email:</strong> {{ currentCustomer?.email || '—' }}</p>
       </div>
 
       <div
         class="rounded-box mb-4 overflow-x-auto border border-gray-200 bg-white"
       >
-        <table class="table border border-gray-200 bg-white">
+        <table
+          class="w-full border-collapse overflow-auto border border-gray-300 bg-white"
+        >
           <thead>
-            <tr>
-              <th>#</th>
-              <th>Продукт</th>
-              <th>Лицензия</th>
-              <th>Модуль</th>
-              <th>Цена</th>
-              <th>Скидка</th>
-              <th>Кол-во</th>
-              <th>Итого</th>
+            <tr class="bg-gray-100">
+              <th class="border border-gray-300 p-2">#</th>
+              <th class="border border-gray-300 p-2">Продукт</th>
+              <th class="border border-gray-300 p-2">Лицензия</th>
+              <th class="border border-gray-300 p-2">Цена</th>
+              <th class="border border-gray-300 p-2">Скидка</th>
+              <th class="border border-gray-300 p-2">Кол-во</th>
+              <th class="border border-gray-300 p-2">Итого</th>
             </tr>
           </thead>
           <tbody>
-            <tr
+            <template
               v-for="(item, idx) in commercialOffer.items"
               :key="item.id"
-              class="odd:bg-white even:bg-gray-200"
             >
-              <th>{{ idx + 1 }}</th>
-              <td>{{ item.product.name }}</td>
-              <td>{{ item.base_license?.name ?? '—' }}</td>
-              <td>{{ item.additional_module?.name ?? '—' }}</td>
-              <td>{{ formatPrice(item.price) }} ₽</td>
-              <td>{{ item.discount?.toFixed(2) ?? 0 }}%</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ formatPrice(item.total) }} ₽</td>
-            </tr>
+              <!-- Основная строка с лицензией -->
+              <tr class="border border-gray-300">
+                <th
+                  rowspan="item.additional_modules.length + 1"
+                  class="border border-gray-300 p-2"
+                >
+                  {{ idx + 1 }}
+                </th>
+                <td
+                  rowspan="item.additional_modules.length + 1"
+                  class="border border-gray-300 p-2"
+                >
+                  {{ item.product.name }}
+                </td>
+                <td class="border border-gray-300 p-2">
+                  {{ item.base_license?.name ?? '—' }}
+                </td>
+                <td class="border border-gray-300 p-2">
+                  {{ formatPrice(item.price ?? 0) }} ₽
+                </td>
+                <td class="border border-gray-300 p-2">
+                  {{ item.discount?.toFixed(2) ?? 0 }}%
+                </td>
+                <td
+                  rowspan="item.additional_modules.length + 1"
+                  class="border border-gray-300 p-2"
+                >
+                  {{ item.quantity }}
+                </td>
+                <td
+                  rowspan="item.additional_modules.length + 1"
+                  class="border border-gray-300 p-2"
+                >
+                  {{ formatPrice(item.total) }} ₽
+                </td>
+              </tr>
+
+              <!-- Заголовок модулей -->
+              <tr class="bg-gray-50">
+                <td colspan="2" class="border border-gray-300 p-2">
+                  <!-- <strong>Доп. модули:</strong> -->
+                </td>
+                <td class="border border-gray-300 p-2">
+                  <strong>Доп. модули</strong>
+                </td>
+                <td class="border border-gray-300 p-2">
+                  <strong>Цена</strong>
+                </td>
+                <td colspan="3" class="border border-gray-300 p-2"></td>
+              </tr>
+
+              <!-- Строки модулей -->
+              <tr
+                v-for="(module, modIdx) in item.additional_modules"
+                :key="module.id"
+                class="border border-gray-300 odd:bg-white even:bg-gray-50"
+              >
+                <td colspan="2" class="border border-gray-300 p-2"></td>
+                <td class="border border-gray-300 p-2">
+                  {{ module.name }}
+                  <span class="ml-1 text-xs text-gray-500">
+                    ({{ module.required ? 'обязательный' : 'опциональный' }})
+                  </span>
+                </td>
+                <td class="border border-gray-300 p-2">
+                  {{ formatPrice(module.price) }} ₽
+                </td>
+                <td colspan="3" class="border border-gray-300 p-2"></td>
+              </tr>
+            </template>
           </tbody>
           <tfoot>
             <tr>
-              <th colspan="7" class="text-right">Итого:</th>
-              <th>{{ formatPrice(totalSum) }} ₽</th>
+              <th colspan="6" class="border border-gray-300 p-2 text-right">
+                Финальная цена:
+              </th>
+              <th class="border border-gray-300 p-2 text-green-600">
+                {{ formatPrice(totalSum) }} ₽
+              </th>
             </tr>
           </tfoot>
         </table>
@@ -94,12 +172,15 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { jsPDF } from 'jspdf'
-import type { CommercialOffersById } from '~/modules/shared/types/adminTypes'
+import type {
+  CommercialOffersById,
+  Customer
+} from '~/modules/shared/types/adminTypes'
 import { useCommercialOffer } from '../composables/useCommercialOffer'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
+import { useCustomer } from '../composables/useCustomer'
 
 definePageMeta({ layout: 'custom' })
 
@@ -108,12 +189,20 @@ const route = useRoute()
 const commercialOfferId = Number(route.params.id)
 
 const { getCommercialOffersById } = useCommercialOffer()
+const { getAllCustomers } = useCustomer()
 const commercialOffer = ref<CommercialOffersById | null>(null)
+const customers = ref<Customer[]>([])
+
+const currentCustomer = ref<Customer | null>(null)
+
 const isExportingPDF = ref(false)
 
 onMounted(async () => {
   try {
     const response = await getCommercialOffersById(commercialOfferId)
+    const customersResponse = await getAllCustomers()
+
+    customers.value = customersResponse
     commercialOffer.value = response
   } catch (err) {
     console.error(err)
@@ -189,25 +278,25 @@ const downloadPDF = () => {
   // Информация о заказчике
   doc.setFontSize(10)
   doc.text(
-    `Заказчик: ${commercialOffer.company || '________________________________________________'}`,
+    `Заказчик: ${currentCustomer.value?.nameCustomer || '________________________________________________'}`,
     20,
     y
   )
   y += 12
   doc.text(
-    `Контактное лицо: ${commercialOffer.contact_person || '________________________________________________'}`,
+    `Контактное лицо: ${currentCustomer.value?.contactPerson || '________________________________________________'}`,
     20,
     y
   )
   y += 12
   doc.text(
-    `Телефон: ${commercialOffer.phone || '________________________________________________'}`,
+    `Телефон: ${currentCustomer.value?.phone || '________________________________________________'}`,
     20,
     y
   )
   y += 12
   doc.text(
-    `Email: ${commercialOffer.email || '________________________________________________'}`,
+    `Email: ${currentCustomer.value?.email || '________________________________________________'}`,
     20,
     y
   )
@@ -259,8 +348,12 @@ const downloadPDF = () => {
       item.base_license?.name ?? '—',
       tableColumnWidths[2] - 2
     )
+    const moduleNames =
+      item.additional_modules.map((module) => module.name).join(', ') ?? '—'
+    const modulePrice =
+      item.additional_modules.map((module) => module.price).join(', ') ?? '—'
     const moduleLines = doc.splitTextToSize(
-      item.additional_module?.name ?? '—',
+      moduleNames,
       tableColumnWidths[3] - 2
     )
     const priceLines = [`${formatPrice(item.price)} ₽`]

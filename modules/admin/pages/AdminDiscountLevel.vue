@@ -1,7 +1,84 @@
 <template>
   <div>
     <h1 class="p-4 text-left text-2xl">Список уровней скидок для продуктов</h1>
-    <div class="mx-auto mt-4 flex max-w-[900px] justify-end">
+
+    <!-- Фильтры и кнопка добавления -->
+    <div class="mx-auto my-4 flex max-w-[900px] flex-wrap justify-end gap-4">
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Поиск по продукту -->
+        <label class="floating-label">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Поиск по продукту"
+            class="input input-sm min-w-[160px] border"
+            @input="handleSearchInput"
+          />
+          <span>Название продукта</span>
+        </label>
+
+        <!-- Фильтр по продукту -->
+        <select
+          v-model="productIdFilter"
+          class="select select-sm border"
+          @change="fetchDiscountLevels"
+        >
+          <option :value="null">Все продукты</option>
+          <option
+            v-for="product in products"
+            :key="product.id"
+            :value="product.id"
+          >
+            {{ product.name_product }}
+          </option>
+        </select>
+
+        <!-- Фильтр по типу скидки -->
+        <select
+          v-model="typeFilter"
+          class="select select-sm border"
+          @change="fetchDiscountLevels"
+        >
+          <option :value="null">Все типы</option>
+          <option v-for="type in discountTypes" :key="type" :value="type">
+            {{ type }}
+          </option>
+        </select>
+
+        <!-- Сортировка -->
+        <div class="flex gap-2">
+          <select
+            v-model="sortField"
+            class="select select-sm border"
+            @change="handleSortChange"
+          >
+            <option :value="null">Без сортировки</option>
+            <option value="discount_percent">По размеру скидки</option>
+            <option value="min_licenses">По минимальным лицензиям</option>
+            <option value="max_licenses">По максимальным лицензиям</option>
+          </select>
+
+          <select
+            v-model="sortDirection"
+            class="select select-sm border"
+            @change="fetchDiscountLevels"
+            :disabled="!sortField"
+          >
+            <option value="asc">По возрастанию</option>
+            <option value="desc">По убыванию</option>
+          </select>
+        </div>
+
+        <!-- Кнопка сброса -->
+        <button
+          class="btn btn-sm btn-outline"
+          @click="resetFilters"
+          :disabled="!hasActiveFilters"
+        >
+          Сбросить
+        </button>
+      </div>
+
       <button
         class="btn btn-accent btn-link hover:text-green-700"
         @click="openModal"
@@ -11,15 +88,14 @@
       <AddedDiscountLevel
         v-model:is-open="isOpenAdded"
         v-model:products="products"
-        @update-products="updateProducts"
+        @update-products="fetchDiscountLevels"
       />
     </div>
 
-    <!-- Карточки не пустые  -->
+    <!-- Карточки -->
     <div
       class="mx-auto grid max-w-[900px] grid-cols-3 items-start justify-center gap-4"
     >
-      <!-- Products -->
       <template v-if="!isLoading">
         <div
           v-for="item in discountLevels"
@@ -28,7 +104,7 @@
         >
           <div class="card-body">
             <h2 class="card-title text-lg font-bold">
-              {{ item.product.name }}
+              {{ item.product?.name || 'Без продукта' }}
             </h2>
 
             <div class="badge badge-accent p-2 text-sm">
@@ -64,12 +140,6 @@
                 Редактировать
               </button>
             </div>
-            <button
-              class="btn btn-sm btn-success"
-              @click="calculateDiuscountLevels(item.id)"
-            >
-              Расчитать процент скидки
-            </button>
           </div>
         </div>
       </template>
@@ -85,9 +155,10 @@
         </div>
       </template>
     </div>
-    <!-- Карточки с бека пустые -->
+
+    <!-- Пустой список -->
     <div
-      v-if="products.length === 0 && !isLoading"
+      v-if="discountLevels.length === 0 && !isLoading"
       class="mx-auto flex max-w-[900px] items-center justify-center gap-4"
     >
       <p class="flex flex-col gap-4 text-2xl font-semibold">
@@ -105,19 +176,22 @@
       v-model:discount-level="discountLevel"
       v-model:is-loading="isLoadingEdit"
       :id-product="editProductId!"
-      @update-products="updateProducts"
+      @update-products="fetchDiscountLevels"
     />
-    <DeleteProductModal
+    <DeleteDiscountLevel
       v-model:is-open="isOpenDelete"
       :id-product="deleteProductId"
-      @update-products="updateProducts"
+      @update-products="fetchDiscountLevels"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import { debounce } from 'lodash-es'
+import { useRoute, useRouter } from 'vue-router'
 import AddedDiscountLevel from '../components/DiscountLevel/AddedDiscountLevel.vue'
 import EditDiscountLevel from '../components/DiscountLevel/EditDiscountLevel.vue'
+import DeleteDiscountLevel from '../components/DiscountLevel/DeleteDiscountLevel.vue'
 import { useProduct } from '~/modules/admin/composables/useProduct'
 import type { Product, PricingTier } from '~/modules/shared/types/adminTypes'
 import SekeletonCards from '../components/skeletons/SekeletonCards.vue'
@@ -127,67 +201,117 @@ definePageMeta({
   layout: 'custom'
 })
 
+const route = useRoute()
+const router = useRouter()
 const { getAllProducts } = useProduct()
+const { getAllDiscountLevel, getDiscountLevelById } = useDiscountLevel()
 
-const { getAllDiscountLevel, getDiscountLevelById, generateDiscountPrice } =
-  useDiscountLevel()
-
+// Реактивные данные
 const products = ref<Product[]>([])
-const product = ref<Product>()
-
 const discountLevels = ref<PricingTier[]>([])
 const discountLevel = ref<PricingTier>()
-
-onMounted(async () => {
-  isLoading.value = true
-  try {
-    const response = await getAllProducts()
-    const responseDiscountLevel = await getAllDiscountLevel()
-
-    console.log(response)
-    discountLevels.value = responseDiscountLevel
-    products.value = response
-  } catch (error) {
-    console.log(error)
-  } finally {
-    isLoading.value = false
-  }
-})
-
+const searchQuery = ref('')
+const productIdFilter = ref<number | null>(null)
+const typeFilter = ref<string | null>(null)
+const sortField = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
 const isOpenAdded = ref(false)
 const isOpenEdit = ref(false)
 const isOpenDelete = ref(false)
 const isLoading = ref(false)
 const isLoadingEdit = ref(false)
-
 const editProductId = ref<number | null>(null)
 const deleteProductId = ref<number | null>(null)
 
-function openModal() {
-  isOpenAdded.value = true
+// Уникальные типы скидок
+const discountTypes = computed(() => {
+  const types = new Set<string>()
+  discountLevels.value.forEach((item) => types.add(item.type))
+  return Array.from(types)
+})
+
+// Проверка активных фильтров
+const hasActiveFilters = computed(() => {
+  return (
+    searchQuery.value ||
+    productIdFilter.value !== null ||
+    typeFilter.value !== null ||
+    sortField.value !== null
+  )
+})
+
+// Дебаунс для поиска
+const debouncedSearch = debounce(() => {
+  fetchDiscountLevels()
+}, 500)
+
+// Обработчики
+const handleSearchInput = () => {
+  debouncedSearch()
 }
 
-async function updateProducts() {
+const handleSortChange = () => {
+  if (!sortField.value) {
+    sortDirection.value = 'asc'
+  }
+  fetchDiscountLevels()
+}
+
+// Получение данных с фильтрами
+async function fetchDiscountLevels() {
   isLoading.value = true
   try {
-    const response = await getAllProducts()
-    const responseDiscountLevel = await getAllDiscountLevel()
+    const params = {
+      search: searchQuery.value || undefined,
+      product_id: productIdFilter.value || undefined,
+      type: typeFilter.value || undefined,
+      sort: sortField.value || undefined,
+      direction: sortField.value ? sortDirection.value : undefined
+    }
 
-    console.log(response)
-    discountLevels.value = responseDiscountLevel
-    products.value = response
+    // Обновляем URL
+    router.push({ query: params })
+
+    const [levelsResponse, productsResponse] = await Promise.all([
+      getAllDiscountLevel(params),
+      getAllProducts()
+    ])
+
+    discountLevels.value = levelsResponse
+    products.value = productsResponse
   } catch (error) {
-    console.log(error)
+    console.error('Ошибка при загрузке уровней скидок:', error)
   } finally {
     isLoading.value = false
   }
 }
 
-function truncate(str: string, num: number) {
-  if (str.length <= num) {
-    return str
-  }
-  return str.slice(0, num) + '...'
+// Сброс фильтров
+function resetFilters() {
+  searchQuery.value = ''
+  productIdFilter.value = null
+  typeFilter.value = null
+  sortField.value = null
+  sortDirection.value = 'asc'
+  fetchDiscountLevels()
+}
+
+// Инициализация из query параметров URL
+onMounted(() => {
+  if (route.query.search) searchQuery.value = route.query.search as string
+  if (route.query.product_id)
+    productIdFilter.value = parseInt(route.query.product_id as string)
+  if (route.query.type) typeFilter.value = route.query.type as string
+  if (route.query.sort) sortField.value = route.query.sort as string
+  if (route.query.direction)
+    sortDirection.value = route.query.direction as 'asc' | 'desc'
+
+  fetchDiscountLevels()
+})
+
+// Остальные методы
+function openModal() {
+  isOpenAdded.value = true
 }
 
 async function handleOpenEdit(id: number) {
@@ -197,9 +321,8 @@ async function handleOpenEdit(id: number) {
   try {
     const response = await getDiscountLevelById(id)
     discountLevel.value = response
-    console.log(response)
   } catch (error) {
-    console.log(error)
+    console.error('Ошибка при загрузке уровня скидки:', error)
   } finally {
     isLoadingEdit.value = false
   }
@@ -209,18 +332,4 @@ function handleOpenDelete(id: number) {
   isOpenDelete.value = true
   deleteProductId.value = id
 }
-
-async function calculateDiuscountLevels(id: number) {
-  isLoading.value = true
-  try {
-    await generateDiscountPrice(id)
-    updateProducts()
-  } catch (e) {
-    console.error('Ошибка при создании:', e)
-  } finally {
-    isLoading.value = false
-  }
-}
 </script>
-
-<style scoped></style>

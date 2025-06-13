@@ -49,7 +49,7 @@
                 <div class="mt-4 space-y-4">
                   <div>
                     <label class="block text-sm font-medium text-gray-700"
-                      >Цена предложения</label
+                      >Цена продления</label
                     >
                     <input
                       v-model.number="offerPrice"

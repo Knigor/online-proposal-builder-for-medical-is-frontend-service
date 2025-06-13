@@ -29,7 +29,9 @@
             <DialogPanel
               class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
-              <h1>Вы уверены что хотите удалить модуль {{ idProduct }} ?</h1>
+              <h1>
+                Вы уверены что хотите удалить уровень скидки {{ idProduct }}?
+              </h1>
 
               <div class="mt-6 flex gap-4">
                 <button class="btn btn-outline border" @click="closeModal">
@@ -60,12 +62,12 @@ import {
   Dialog,
   DialogPanel
 } from '@headlessui/vue'
-import { useAdditionalModule } from '../../composables/useAdditionalModule'
+import { useDiscountLevel } from '../../composables/useDiscountLevel'
 
 const isOpen = defineModel<boolean>('isOpen')
 const idProduct = defineModel<number | null>('idProduct')
 
-const { deleteAdditionalModuleModal } = useAdditionalModule()
+const { deleteDiscountLevel } = useDiscountLevel()
 const emit = defineEmits(['updateProducts'])
 
 function closeModal() {
@@ -78,7 +80,7 @@ async function deleteProduct() {
   globalStore.loading = true
   try {
     if (idProduct.value) {
-      const response = await deleteAdditionalModuleModal(idProduct.value)
+      const response = await deleteDiscountLevel(idProduct.value)
       console.log(response)
     }
     emit('updateProducts')

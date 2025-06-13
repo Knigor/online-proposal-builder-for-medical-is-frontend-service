@@ -4,9 +4,18 @@ import type { createPricingTier } from '~/modules/shared/types/adminTypes'
 export const useDiscountLevel = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
 
-  const getAllDiscountLevel = async () => {
+  const getAllDiscountLevel = async (params: {
+    type?: string
+    product_id?: number
+    search?: string
+    min_discount?: number
+    max_discount?: number
+  }) => {
     try {
-      const response = await $protectedApi('discount-levels', { method: 'GET' })
+      const response = await $protectedApi('discount-levels', {
+        method: 'GET',
+        params
+      })
       return response
     } catch (error) {
       return error

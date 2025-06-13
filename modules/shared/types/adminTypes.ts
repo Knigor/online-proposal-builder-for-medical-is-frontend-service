@@ -28,6 +28,7 @@ export type AdditionalModule = {
   offer_price: number
   purchase_price: number
   max_discount_percent: number
+  name_product: string
   product_id: number
 }
 
@@ -65,46 +66,25 @@ export interface BaseLicenseCreate {
   product_id: number
 }
 
-export interface LicenseCompositionBaseLicense {
-  id: number
-  nameLicense: string
-  descriptionLicense: string
-  offerPriceLicense: number
-  purchasePriceLicense: number
-  maxDiscount: number
-  typeLicense: string
-  product: {
-    id: number
-    nameProduct: string
-  }
-}
-
-export interface LicenseCompositionAdditionalModule {
-  id: number
-  nameModule: string
-  descriptionModule: string
-  offerPrice: number
-  purchasePrice: number
-  maxDiscountPercent: number
-  product: {
-    id: number
-    nameProduct: string
-  }
-}
-
 export interface LicenseComposition {
-  id: number
+  base_license_id: number
+  base_license_name: string
+  additional_modules: {
+    id: number
+    name: string
+    relation: string
+  }[]
+}
+
+export interface licenseModule {
+  module_id: number
   required: boolean
   compatible: boolean
-  baseLicense: LicenseCompositionBaseLicense
-  additionalModule: LicenseCompositionAdditionalModule
 }
 
 export interface createLicenseComposition {
-  required: boolean
-  compatible: boolean
   base_license_id: number
-  additional_module_id: number
+  modules: licenseModule[]
 }
 
 export interface DiscountProduct {
@@ -129,6 +109,7 @@ export interface createPricingTier {
   max_licenses: number
   min_amount: number
   max_amount: number
+  discount_percent: number
   product_id: number
 }
 
@@ -174,16 +155,18 @@ export interface CommercialOffersItemsById {
     id: number
     name: string
   }
-  base_license?: {
+  base_license: {
     id: number
     name: string
     price: number
   }
-  additional_module?: {
+  additional_modules: {
     id: number
     name: string
     price: number
-  }
+    required: boolean
+    compatible: boolean
+  }[]
   quantity: number
   price: number
   discount: number | null
@@ -197,4 +180,12 @@ export interface CommercialOffersById {
   total_price: number
   accepted_at: string | null
   items: CommercialOffersItemsById[]
+}
+
+export interface Customer {
+  id: number
+  nameCustomer: string
+  contactPerson: string
+  phone: string
+  email: string
 }

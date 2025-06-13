@@ -4,14 +4,24 @@ import type { createLicenseComposition } from '~/modules/shared/types/adminTypes
 export const useLicenseComposition = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
 
-  const getAllLicenseComposition = async () => {
+  const getAllLicenseComposition = async (
+    params: {
+      base_license_name?: string
+      required?: boolean
+      compatible?: boolean
+      sort?: 'base_license_name' | 'additional_module_name'
+      direction?: 'asc' | 'desc'
+    } = {}
+  ) => {
     try {
       const response = await $protectedApi('license-compositions', {
-        method: 'GET'
+        method: 'GET',
+        params
       })
       return response
     } catch (error) {
-      return error
+      console.error('Ошибка при получении композиций лицензий:', error)
+      throw error
     }
   }
 

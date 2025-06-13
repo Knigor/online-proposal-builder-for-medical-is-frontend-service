@@ -1,7 +1,65 @@
 <template>
   <div>
     <h1 class="p-4 text-left text-2xl">Список продуктов</h1>
-    <div class="mx-auto mt-4 flex max-w-[900px] justify-end">
+    <div class="mx-auto my-4 flex max-w-[900px] flex-wrap justify-end gap-4">
+      <!-- Фильтры и поиск -->
+      <div class="flex flex-wrap items-center gap-4">
+        <!-- Поиск по названию продукта -->
+        <label class="floating-label">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Поиск по названию"
+            class="input input-sm min-w-[160px] border"
+            @input="handleSearchInput"
+          />
+          <span>Поиск</span>
+        </label>
+
+        <!-- Фильтр по ID пользователя -->
+        <!-- <label class="floating-label">
+          <input
+            v-model.number="userIdFilter"
+            type="number"
+            placeholder="ID пользователя"
+            class="input input-sm min-w-[160px] border"
+            @input="fetchProducts"
+          />
+          <span>ID пользователя</span>
+        </label> -->
+
+        <!-- Сортировка -->
+        <div class="flex gap-2">
+          <select
+            v-model="sortField"
+            class="select select-sm border"
+            @change="handleSortChange"
+          >
+            <option :value="null">Без сортировки</option>
+            <option value="name_product">По названию</option>
+          </select>
+
+          <select
+            v-model="sortDirection"
+            class="select select-sm border"
+            @change="fetchProducts"
+            :disabled="!sortField"
+          >
+            <option value="asc">По возрастанию</option>
+            <option value="desc">По убыванию</option>
+          </select>
+        </div>
+
+        <!-- Кнопка сброса -->
+        <button
+          class="btn btn-sm btn-outline"
+          @click="resetFilters"
+          :disabled="!hasActiveFilters"
+        >
+          Сбросить
+        </button>
+      </div>
+
       <button
         class="btn btn-accent btn-link hover:text-green-700"
         @click="openModal"
@@ -10,11 +68,11 @@
       </button>
       <AddedProductModal
         v-model:is-open="isOpenAdded"
-        @update-products="updateProducts"
+        @update-products="fetchProducts"
       />
     </div>
 
-    <!-- Карточки не пустые  -->
+    <!-- Карточки не пустые -->
     <div
       class="mx-auto grid max-w-[900px] grid-cols-3 items-start justify-center gap-4"
     >
@@ -30,7 +88,6 @@
               {{ item.name_product }}
             </h2>
             <div class="badge badge-accent p-2">Активный</div>
-            <!-- <div v-else class="badge badge-error p-2">Не активный</div> -->
             <p>
               {{ truncate(item.discription_product, 60) }}
             </p>
@@ -63,6 +120,7 @@
         </div>
       </template>
     </div>
+
     <!-- Карточки с бека пустые -->
     <div
       v-if="products.length === 0 && !isLoading"
@@ -82,17 +140,19 @@
       v-model:product="product"
       v-model:is-loading="isLoadingEdit"
       :id-product="editProductId!"
-      @update-products="updateProducts"
+      @update-products="fetchProducts"
     />
     <DeleteProductModal
       v-model:is-open="isOpenDelete"
       :id-product="deleteProductId"
-      @update-products="updateProducts"
+      @update-products="fetchProducts"
     />
   </div>
 </template>
 
 <script setup lang="ts">
+import { debounce } from 'lodash-es'
+import { useRoute, useRouter } from 'vue-router'
 import AddedProductModal from '../components/Product/AddedProductModal.vue'
 import EditProductModal from '../components/Product/EditProductModal.vue'
 import DeleteProductModal from '../components/Product/DeleteProductModal.vue'
@@ -104,25 +164,17 @@ definePageMeta({
   layout: 'custom'
 })
 
+const route = useRoute()
+const router = useRouter()
 const { getAllProducts, getProductById } = useProduct()
 
+// Реактивные данные
 const products = ref<Product[]>([])
 const product = ref<Product>()
-
-onMounted(async () => {
-  isLoading.value = true
-  try {
-    const response = await getAllProducts()
-
-    console.log(response)
-    products.value = response
-  } catch (error) {
-    console.log(error)
-  } finally {
-    isLoading.value = false
-  }
-})
-
+const searchQuery = ref('')
+const userIdFilter = ref<number | null>(null)
+const sortField = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
 const isOpenAdded = ref(false)
 const isOpenEdit = ref(false)
 const isOpenDelete = ref(false)
@@ -131,22 +183,77 @@ const isLoadingEdit = ref(false)
 const editProductId = ref<number | null>(null)
 const deleteProductId = ref<number | null>(null)
 
-function openModal() {
-  isOpenAdded.value = true
+// Проверка активных фильтров
+const hasActiveFilters = computed(() => {
+  return (
+    searchQuery.value || userIdFilter.value !== null || sortField.value !== null
+  )
+})
+
+// Дебаунс для поиска
+const debouncedSearch = debounce(() => {
+  fetchProducts()
+}, 500)
+
+// Обработчик ввода поиска
+const handleSearchInput = () => {
+  debouncedSearch()
 }
 
-async function updateProducts() {
+// Обработчик изменения сортировки
+const handleSortChange = () => {
+  if (!sortField.value) {
+    sortDirection.value = 'asc'
+  }
+  fetchProducts()
+}
+
+// Получение продуктов с учетом фильтров
+async function fetchProducts() {
   isLoading.value = true
   try {
-    const response = await getAllProducts()
+    const params = {
+      search: searchQuery.value || undefined,
+      user_id: userIdFilter.value || undefined,
+      sort: sortField.value || undefined,
+      direction: sortField.value ? sortDirection.value : undefined
+    }
 
-    console.log(response)
+    // Обновляем URL
+    router.push({ query: params })
+
+    const response = await getAllProducts(params)
     products.value = response
   } catch (error) {
-    console.log(error)
+    console.error('Ошибка при загрузке продуктов:', error)
   } finally {
     isLoading.value = false
   }
+}
+
+// Сброс фильтров
+function resetFilters() {
+  searchQuery.value = ''
+  userIdFilter.value = null
+  sortField.value = null
+  sortDirection.value = 'asc'
+  fetchProducts()
+}
+
+// Инициализация из query параметров URL
+onMounted(() => {
+  if (route.query.search) searchQuery.value = route.query.search as string
+  if (route.query.user_id)
+    userIdFilter.value = parseInt(route.query.user_id as string)
+  if (route.query.sort) sortField.value = route.query.sort as string
+  if (route.query.direction)
+    sortDirection.value = route.query.direction as 'asc' | 'desc'
+
+  fetchProducts()
+})
+
+function openModal() {
+  isOpenAdded.value = true
 }
 
 function truncate(str: string, num: number) {
@@ -163,9 +270,8 @@ async function handleOpenEdit(id: number) {
   try {
     const response = await getProductById(id)
     product.value = response
-    console.log(response)
   } catch (error) {
-    console.log(error)
+    console.error('Ошибка при загрузке продукта:', error)
   } finally {
     isLoadingEdit.value = false
   }

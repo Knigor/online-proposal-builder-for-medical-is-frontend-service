@@ -4,12 +4,23 @@ import type { ProductUpdate } from '~/modules/shared/types/adminTypes'
 export const useProduct = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
 
-  const getAllProducts = async () => {
+  const getAllProducts = async (
+    params: {
+      search?: string
+      user_id?: number
+      sort?: 'name_product'
+      direction?: 'asc' | 'desc'
+    } = {}
+  ) => {
     try {
-      const response = await $protectedApi('products/', { method: 'GET' })
+      const response = await $protectedApi('products/', {
+        method: 'GET',
+        params
+      })
       return response
     } catch (error) {
-      return error
+      console.error('Ошибка при получении продуктов:', error)
+      throw error
     }
   }
 

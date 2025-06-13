@@ -116,6 +116,18 @@
                     />
                   </div>
                 </div>
+                <div class="w-full">
+                  <label class="block text-sm font-medium text-gray-700">
+                    Процент скидки
+                  </label>
+                  <input
+                    v-model.number="discountPercent"
+                    type="number"
+                    class="input input-info border-info mt-1 w-full border"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
               </div>
 
               <!-- Кнопки -->
@@ -174,6 +186,7 @@ const minLicenses = ref(1)
 const maxLicenses = ref(100)
 const minAmount = ref(0)
 const maxAmount = ref(100000)
+const discountPercent = ref(0)
 
 async function createProduct() {
   if (!currentProduct.value) return
@@ -185,6 +198,7 @@ async function createProduct() {
       max_licenses: maxLicenses.value,
       min_amount: minAmount.value,
       max_amount: maxAmount.value,
+      discount_percent: discountPercent.value,
       product_id: currentProduct.value.id
     }
 

@@ -27,76 +27,116 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
               <h1 class="text-lg leading-6 font-medium text-gray-900">
                 Включение модулей и лицензии
               </h1>
               <br />
 
-              <!-- Основные поля -->
-              <div class="space-y-4">
-                <div>
-                  <label class="label text-gray-900">
-                    <input
-                      v-model="required"
-                      type="checkbox"
-                      class="checkbox checkbox-info border"
-                    />
-                    Обязательно входит
-                  </label>
-                </div>
-
-                <div>
-                  <label class="label text-gray-900">
-                    <input
-                      v-model="compatible"
-                      type="checkbox"
-                      class="checkbox checkbox-info border"
-                    />
-                    Сочетается
-                  </label>
-                </div>
+              <!-- Выбор лицензии -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700">
+                  Выберите лицензию
+                </label>
+                <select
+                  v-model="licenseId"
+                  class="select select-info mt-1 w-full border"
+                >
+                  <option disabled :value="0">-- Выберите лицензию --</option>
+                  <option
+                    v-for="item in baseLicenseData"
+                    :key="item.id"
+                    :value="item.id"
+                  >
+                    {{ item.nameLicense }}
+                  </option>
+                </select>
               </div>
 
-              <!-- Селекты -->
-              <div class="mt-4 space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">
-                    Выберите лицензию
-                  </label>
-                  <select
-                    v-model="licenseId"
-                    class="select select-info mt-1 w-full border"
-                  >
-                    <option disabled :value="0">-- Выберите лицензию --</option>
-                    <option
-                      v-for="item in baseLicenseData"
-                      :key="item.id"
-                      :value="item.id"
+              <!-- Добавление модулей -->
+              <div class="mt-6 space-y-4">
+                <h2 class="text-md font-medium text-gray-900">
+                  Добавленные модули
+                </h2>
+                <div
+                  v-for="(module, index) in modules"
+                  :key="index"
+                  class="rounded-lg border p-4"
+                >
+                  <div class="mb-2 flex items-center justify-between">
+                    <span class="font-medium">{{
+                      getModuleName(module.module_id)
+                    }}</span>
+                    <button
+                      @click="removeModule(index)"
+                      class="text-red-500 hover:text-red-700"
                     >
-                      {{ item.nameLicense }}
-                    </option>
-                  </select>
+                      Удалить
+                    </button>
+                  </div>
+
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-4">
+                      <span class="text-sm font-medium">Тип включения:</span>
+                      <label class="flex items-center gap-2">
+                        <input
+                          v-model="module.selection"
+                          type="radio"
+                          :name="'selection-' + module.module_id"
+                          value="required"
+                          class="radio radio-primary border"
+                        />
+                        Обязательно входит
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input
+                          v-model="module.selection"
+                          type="radio"
+                          :name="'selection-' + module.module_id"
+                          value="compatible"
+                          class="radio radio-primary border"
+                        />
+                        Сочетается
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input
+                          v-model="module.selection"
+                          type="radio"
+                          :name="'selection-' + module.module_id"
+                          value="none"
+                          class="radio radio-primary border"
+                        />
+                        Ничего
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">
-                    Выберите дополнительный модуль
-                  </label>
-                  <select
-                    v-model="additionalId"
-                    class="select select-info mt-1 w-full border"
-                  >
-                    <option disabled :value="0">-- Выберите модуль --</option>
-                    <option
-                      v-for="product in additionalData"
-                      :key="product.id"
-                      :value="product.id"
+                <!-- Добавление нового модуля -->
+                <div class="border-t pt-4">
+                  <div class="flex gap-4">
+                    <select
+                      v-model="newModuleId"
+                      class="select select-info flex-1 border"
                     >
-                      {{ product.name_module }}
-                    </option>
-                  </select>
+                      <option disabled :value="0">-- Выберите модуль --</option>
+                      <option
+                        v-for="product in availableModules"
+                        :key="product.id"
+                        :value="product.id"
+                      >
+                        {{ product.name_module }}
+                      </option>
+                    </select>
+                    <button
+                      @click="addModule"
+                      class="btn btn-primary border"
+                      :disabled="!newModuleId"
+                    >
+                      Добавить модуль
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -128,7 +168,8 @@ import { useAuthStore } from '~/modules/auth/store/authStore'
 import type {
   BaseLicenses,
   AdditionalModule,
-  createLicenseComposition
+  createLicenseComposition,
+  licenseModule
 } from '~/modules/shared/types/adminTypes'
 import {
   TransitionRoot,
@@ -149,14 +190,41 @@ const authStore = useAuthStore()
 const globalStore = useGlobalStore()
 
 // Form fields
-const required = ref(false)
-const compatible = ref(false)
 const licenseId = ref(0)
-const additionalId = ref(0)
+const newModuleId = ref(0)
+const modules = ref<licenseModule[]>([])
 
 const isSubmitDisabled = computed(() => {
-  return globalStore.loading
+  return globalStore.loading || !licenseId.value || modules.value.length === 0
 })
+
+// Доступные для добавления модули (исключая уже добавленные)
+const availableModules = computed(() => {
+  if (!additionalData.value) return []
+  return additionalData.value.filter(
+    (module) => !modules.value.some((m) => m.module_id === module.id)
+  )
+})
+
+function getModuleName(moduleId: number) {
+  const module = additionalData.value?.find((m) => m.id === moduleId)
+  return module?.name_module || 'Неизвестный модуль'
+}
+
+function addModule() {
+  if (!newModuleId.value) return
+
+  modules.value.push({
+    module_id: newModuleId.value,
+    selection: 'none' // значение по умолчанию
+  })
+
+  newModuleId.value = 0
+}
+
+function removeModule(index: number) {
+  modules.value.splice(index, 1)
+}
 
 function closeModal() {
   isOpen.value = false
@@ -164,19 +232,22 @@ function closeModal() {
 }
 
 function resetForm() {
-  required.value = false
-  compatible.value = false
+  licenseId.value = 0
+  newModuleId.value = 0
+  modules.value = []
 }
 
 async function createLicense() {
   globalStore.loading = true
   try {
-    if (authStore.user?.id) {
+    if (authStore.user?.id && licenseId.value && modules.value.length > 0) {
       const licenseDataTransfer: createLicenseComposition = {
-        required: required.value,
-        compatible: compatible.value,
         base_license_id: licenseId.value,
-        additional_module_id: additionalId.value
+        modules: modules.value.map((module) => ({
+          module_id: module.module_id,
+          required: module.selection === 'required',
+          compatible: module.selection === 'compatible'
+        }))
       }
       await createLicenseCompositionPOST(licenseDataTransfer)
       emit('updateProducts')
@@ -189,5 +260,3 @@ async function createLicense() {
   }
 }
 </script>
-
-<style scoped></style>

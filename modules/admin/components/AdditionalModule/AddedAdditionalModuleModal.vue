@@ -30,22 +30,38 @@
               class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
             >
               <h1 class="text-lg leading-6 font-medium text-gray-900">
-                Заполните поля для создания продукта
+                Заполните поля для создания дополнительного модуля
               </h1>
               <br />
 
               <!-- Поля для заполнения  -->
-              <ProductForm
-                v-model:name-product="nameProduct"
-                v-model:is-active="isActive"
-                v-model:description-product="descriptionProduct"
-              />
+              <div class="flex flex-col gap-1">
+                <label for="name">Название модуля</label>
+                <input
+                  id="name"
+                  v-model="nameProduct"
+                  type="text"
+                  placeholder="Введите название продукта"
+                  class="input input-info border"
+                />
+              </div>
+              <!-- Описание продукта -->
+              <div class="mt-2 flex flex-col gap-1">
+                <label for="description">Описание модуля</label>
+                <textarea
+                  id="description"
+                  v-model="descriptionProduct"
+                  placeholder="Введите описание продукта"
+                  class="textarea textarea-info max-h-[150px] border"
+                >
+                </textarea>
+              </div>
 
               <!-- Новые поля -->
               <div class="mt-4 space-y-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700"
-                    >Цена предложения</label
+                    >Цена продления</label
                   >
                   <input
                     v-model.number="offerPrice"
@@ -138,7 +154,6 @@
 </template>
 
 <script setup lang="ts">
-import ProductForm from '../ProductForm.vue'
 import { useGlobalStore } from '~/modules/shared/store/globalStore'
 import { useAuthStore } from '~/modules/auth/store/authStore'
 
