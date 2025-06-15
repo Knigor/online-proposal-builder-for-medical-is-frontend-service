@@ -78,7 +78,6 @@
 
 <script setup lang="ts">
 import TypeProduct from '../components/TypeProduct.vue'
-import TypeAdditionalModule from '../components/TypeAdditionalModule.vue'
 import TypeBaseLicense from '../components/TypeBaseLicense.vue'
 import StartKP from '../components/StartKP.vue'
 import { useCommercialOffer } from '~/modules/admin/composables/useCommercialOffer'

@@ -197,3 +197,15 @@ export interface Customer {
   phone: string
   email: string
 }
+
+export interface UpdateCommercialOffer {
+  product_id?: number
+  base_license_id?: number
+  item_modules?: {
+    id: number
+    module_id: number
+    action: 'add' | 'remove'
+  }[]
+  quantity?: number
+  discount?: number | null
+}
