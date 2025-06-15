@@ -57,7 +57,7 @@
                       Личный кабинет
                     </button>
                   </MenuItem>
-                  <MenuItem v-slot="{ active }">
+                  <!-- <MenuItem v-slot="{ active }">
                     <button
                       :class="[
                         active ? 'bg-blue-500 text-white' : 'text-gray-900',
@@ -70,7 +70,7 @@
                     >
                       Создать КП
                     </button>
-                  </MenuItem>
+                  </MenuItem> -->
                 </div>
                 <div v-else class="flex flex-col gap-1 px-1 py-1">
                   <MenuItem v-slot="{ active }">

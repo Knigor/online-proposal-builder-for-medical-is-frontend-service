@@ -21,7 +21,7 @@
           :is="current"
           v-model:product-id="product_id"
           v-model:base-license-id="base_license_id"
-          v-model:additional_module_id="additional_module_id"
+          v-model:selected-modules="selectedModules"
           :products="ProductData"
           :licenses="BaseLicenseData"
           :additional-module="AdditionalModuleData"
@@ -64,13 +64,13 @@
         >
           Получить предложения
         </button>
-        <button
+        <!-- <button
           v-if="currentIndex === 0"
           class="btn btn-link btn-info"
           @click="navigateTo('/manager-lk')"
         >
           Пропустить
-        </button>
+        </button> -->
       </div>
     </div>
   </div>
@@ -95,6 +95,11 @@ import { useAdditionalModule } from '~/modules/admin/composables/useAdditionalMo
 const route = useRoute()
 
 onMounted(async () => {
+  if (route.query.id) {
+    commercial_offer_id.value = Number(route.query.id)
+    currentIndex.value = 1
+  }
+
   try {
     const response = await getAllProducts()
     const responseBaseLicenses = await getAllBaseLicenses()
@@ -121,23 +126,8 @@ const { getAllProducts } = useProduct()
 const { getAllBaseLicenses } = useBaseLicenses()
 const { getAllAdditionalModules } = useAdditionalModule()
 
-const components = [StartKP, TypeProduct, TypeBaseLicense, TypeAdditionalModule]
+const components = [StartKP, TypeProduct, TypeBaseLicense]
 const currentIndex = ref(0)
-
-watch(
-  commercial_offer_id,
-  () => {
-    if (Object.keys(route.query).length === 0) {
-      currentIndex.value = 0
-    } else {
-      commercial_offer_id.value = Number(route.query.id)
-      currentIndex.value = 1
-    }
-  },
-  {
-    immediate: true
-  }
-)
 
 const currentProgress = computed(
   () => ((currentIndex.value + 1) / components.length) * 100
@@ -148,21 +138,23 @@ const current = computed(() => components[currentIndex.value])
 //FORM
 const product_id = ref(0)
 const base_license_id = ref(0)
-const additional_module_id = ref(0)
+// const additional_module_id = ref(0)
+const selectedModules = ref<number[]>([])
+
 //FORM SEND
 const dataKPitems = ref<CommercialOffersItems>({
   product_id: product_id.value,
   base_license_id: base_license_id.value,
-  additional_module_id: additional_module_id.value
+  additional_module_ids: selectedModules.value
 })
 // Следим за изменением переменных
 watch(
-  [product_id, base_license_id, additional_module_id],
-  ([newProductId, newBaseLicenseId, newAdditionalModuleId]) => {
+  [product_id, base_license_id, selectedModules],
+  ([newProductId, newBaseLicenseId, newSelectedModules]) => {
     dataKPitems.value = {
       product_id: newProductId,
       base_license_id: newBaseLicenseId,
-      additional_module_id: newAdditionalModuleId
+      additional_module_ids: newSelectedModules
     }
   }
 )
@@ -182,10 +174,8 @@ function handleBack() {
 async function handleStartKP() {
   try {
     const response = await createCommercialOffer()
+    handleNext()
     commercial_offer_id.value = response.id
-    if (currentIndex.value < components.length - 1) {
-      currentIndex.value++
-    }
   } catch (error) {
     console.log(error)
   }

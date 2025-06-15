@@ -138,19 +138,15 @@
               </div>
             </div>
 
-            <div class="mt-4 flex flex-wrap justify-end gap-2">
-              <button
-                class="btn btn-sm btn-error"
-                @click="handleOpenDelete(item.base_license_id)"
-              >
-                Удалить
-              </button>
-              <button
-                class="btn btn-sm btn-warning"
+            <div class="mt-4 flex flex-wrap justify-end gap-3">
+              <Pencil
+                class="h-6 w-6 cursor-pointer text-gray-600 hover:text-green-600"
                 @click="handleOpenEdit(item.base_license_id)"
-              >
-                Редактировать
-              </button>
+              />
+              <Trash2
+                class="h-6 w-6 cursor-pointer text-gray-600 hover:text-red-600"
+                @click="handleOpenDelete(item.base_license_id)"
+              />
             </div>
           </div>
         </div>
@@ -161,7 +157,7 @@
         <div
           v-for="n in 6"
           :key="n"
-          class="card bg-base-100 mb-4 min-h-64 w-64 shadow-sm"
+          class="card bg-base-100 mb-4 min-h-64 shadow-sm"
         >
           <SekeletonCards />
         </div>
@@ -216,6 +212,7 @@ import { useLicenseComposition } from '../composables/useLicenseComposition'
 import { useAdditionalModule } from '../composables/useAdditionalModule'
 import { useBaseLicenses } from '../composables/useBaseLicenses'
 import { useProduct } from '../composables/useProduct'
+import { Pencil, Trash2 } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'custom'

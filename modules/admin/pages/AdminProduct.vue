@@ -16,18 +16,6 @@
           <span>Поиск</span>
         </label>
 
-        <!-- Фильтр по ID пользователя -->
-        <!-- <label class="floating-label">
-          <input
-            v-model.number="userIdFilter"
-            type="number"
-            placeholder="ID пользователя"
-            class="input input-sm min-w-[160px] border"
-            @input="fetchProducts"
-          />
-          <span>ID пользователя</span>
-        </label> -->
-
         <!-- Сортировка -->
         <div class="flex gap-2">
           <select
@@ -91,19 +79,15 @@
             <p>
               {{ truncate(item.discription_product, 60) }}
             </p>
-            <div class="flex flex-wrap justify-end gap-2">
-              <button
-                class="btn btn-sm btn-error"
-                @click="handleOpenDelete(item.id)"
-              >
-                Удалить
-              </button>
-              <button
-                class="btn btn-sm btn-warning"
+            <div class="flex flex-wrap justify-end gap-3">
+              <Pencil
+                class="h-6 w-6 cursor-pointer text-gray-600 hover:text-green-600"
                 @click="handleOpenEdit(item.id)"
-              >
-                Редактировать
-              </button>
+              />
+              <Trash2
+                class="h-6 w-6 cursor-pointer text-gray-600 hover:text-red-600"
+                @click="handleOpenDelete(item.id)"
+              />
             </div>
           </div>
         </div>
@@ -159,6 +143,7 @@ import DeleteProductModal from '../components/Product/DeleteProductModal.vue'
 import { useProduct } from '~/modules/admin/composables/useProduct'
 import type { Product } from '~/modules/shared/types/adminTypes'
 import SekeletonCards from '../components/skeletons/SekeletonCards.vue'
+import { Pencil, Trash2 } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'custom'

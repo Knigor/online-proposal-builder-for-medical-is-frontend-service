@@ -95,7 +95,7 @@
                   {{ item.base_license?.name ?? '—' }}
                 </td>
                 <td class="border border-gray-300 p-2">
-                  {{ formatPrice(item.price ?? 0) }} ₽
+                  {{ formatPrice(item.base_license.price ?? 0) }} ₽
                 </td>
                 <td class="border border-gray-300 p-2">
                   {{ item.discount?.toFixed(2) ?? 0 }}%
@@ -130,19 +130,19 @@
 
               <!-- Строки модулей -->
               <tr
-                v-for="(module, modIdx) in item.additional_modules"
+                v-for="(module, modIdx) in item.item_modules"
                 :key="module.id"
                 class="border border-gray-300 odd:bg-white even:bg-gray-50"
               >
                 <td colspan="2" class="border border-gray-300 p-2"></td>
                 <td class="border border-gray-300 p-2">
-                  {{ module.name }}
-                  <span class="ml-1 text-xs text-gray-500">
+                  {{ module.module.name }}
+                  <!-- <span class="ml-1 text-xs text-gray-500">
                     ({{ module.required ? 'обязательный' : 'опциональный' }})
-                  </span>
+                  </span> -->
                 </td>
                 <td class="border border-gray-300 p-2">
-                  {{ formatPrice(module.price) }} ₽
+                  {{ formatPrice(module.module.price) }} ₽
                 </td>
                 <td colspan="3" class="border border-gray-300 p-2"></td>
               </tr>
@@ -349,9 +349,9 @@ const downloadPDF = () => {
       tableColumnWidths[2] - 2
     )
     const moduleNames =
-      item.additional_modules.map((module) => module.name).join(', ') ?? '—'
+      item.item_modules.map((module) => module.module.name).join(', ') ?? '—'
     const modulePrice =
-      item.additional_modules.map((module) => module.price).join(', ') ?? '—'
+      item.item_modules.map((module) => module.module.price).join(', ') ?? '—'
     const moduleLines = doc.splitTextToSize(
       moduleNames,
       tableColumnWidths[3] - 2

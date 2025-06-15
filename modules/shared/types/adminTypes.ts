@@ -76,6 +76,13 @@ export interface LicenseComposition {
   }[]
 }
 
+export type AdditionalModules = {
+  id: number
+  name: string
+  price: number
+  relation: string
+}
+
 export interface licenseModule {
   module_id: number
   required: boolean
@@ -140,13 +147,13 @@ export interface CreateCommercialOffer {
 export interface AddProductToCommercialOffer {
   product_id: number
   base_license_id: number
-  additional_module_id: number
+  additional_module_ids: number[]
 }
 
 export interface CommercialOffersItems {
   product_id: number
   base_license_id: number
-  additional_module_id: number
+  additional_module_ids: number[]
 }
 
 export interface CommercialOffersItemsById {
@@ -160,12 +167,13 @@ export interface CommercialOffersItemsById {
     name: string
     price: number
   }
-  additional_modules: {
+  item_modules: {
     id: number
-    name: string
-    price: number
-    required: boolean
-    compatible: boolean
+    module: {
+      id: number
+      name: string
+      price: number
+    }
   }[]
   quantity: number
   price: number

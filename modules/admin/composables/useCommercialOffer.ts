@@ -4,10 +4,15 @@ import type { AddProductToCommercialOffer } from '~/modules/shared/types/adminTy
 export const useCommercialOffer = () => {
   const { $protectedApi } = useNuxtApp() as unknown as { $protectedApi: $Fetch }
 
-  const getAllCommercialOffers = async () => {
+  const getAllCommercialOffers = async (params: {
+    search?: string
+    status?: boolean
+    sort?: string
+  }) => {
     try {
       const response = await $protectedApi('commercial-offers', {
-        method: 'GET'
+        method: 'GET',
+        params
       })
       return response
     } catch (error) {
